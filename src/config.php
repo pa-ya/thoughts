@@ -30,7 +30,10 @@ function app_config(): array
         ],
     ];
 
-    $localConfigPath = dirname(__DIR__) . '/config.local.php';
+    $configuredPath = getenv('APP_CONFIG_FILE');
+    $localConfigPath = $configuredPath !== false && trim($configuredPath) !== ''
+        ? $configuredPath
+        : dirname(__DIR__) . '/config.local.php';
 
     if (is_file($localConfigPath)) {
         $localConfig = require $localConfigPath;
@@ -61,4 +64,3 @@ function config_get(string $path, $default = null)
 
     return $value;
 }
-

@@ -177,6 +177,16 @@ See `TASKS.md` for the phase-by-phase implementation plan.
 
 Current status: Phase 3 is complete. Phase 4, timeline read view, is next.
 
+## Tests
+
+Run the current PHP test suite from the project root:
+
+```bash
+php tests/run.php
+```
+
+The current tests cover configuration loading, password role resolution, session role helpers, domain constants, and schema smoke checks.
+
 Recommended order:
 
 1. Build foundation and database.

@@ -40,10 +40,11 @@ function database_health_check(): array
             'message' => 'Database connection is ready.',
         ];
     } catch (Throwable $exception) {
+        error_log('Database connection failed: ' . $exception->getMessage());
+
         return [
             'ok' => false,
-            'message' => 'Database connection failed: ' . $exception->getMessage(),
+            'message' => 'Database connection is not configured or not reachable.',
         ];
     }
 }
-
