@@ -1,0 +1,16 @@
+# Local secrets and machine-specific settings
+config.local.php
+.env
+
+# Runtime files
+*.log
+tmp/
+cache/
+
+# Dependencies and editor noise
+vendor/
+node_modules/
+.DS_Store
+.idea/
+.vscode/
+TASKS.md
