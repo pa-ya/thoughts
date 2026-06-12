@@ -113,6 +113,63 @@ test('domain constants match field requirements', function (): void {
     assert_same(1024, comment_field_max_length(), 'Comment field should allow 1024 characters.');
 });
 
+test('timeline grouping nests events by month and day', function (): void {
+    $groups = group_events_by_month_day([
+        [
+            'id' => 3,
+            'event_date' => '2026-07-02',
+            'event_text' => 'July event',
+            'thoughts' => 'Thoughts',
+            'physical_effect' => 'Effect',
+            'feeling_rate' => 8.5,
+            'created_at' => '2026-07-02 12:00:00',
+            'updated_at' => '2026-07-02 12:00:00',
+            'comment_count' => 2,
+            'unread_comment_count' => 1,
+        ],
+        [
+            'id' => 2,
+            'event_date' => '2026-06-12',
+            'event_text' => 'Second June event',
+            'thoughts' => 'Thoughts',
+            'physical_effect' => 'Effect',
+            'feeling_rate' => 4.0,
+            'created_at' => '2026-06-12 11:00:00',
+            'updated_at' => '2026-06-12 11:00:00',
+            'comment_count' => 0,
+            'unread_comment_count' => 0,
+        ],
+        [
+            'id' => 1,
+            'event_date' => '2026-06-12',
+            'event_text' => 'First June event',
+            'thoughts' => 'Thoughts',
+            'physical_effect' => 'Effect',
+            'feeling_rate' => 3.25,
+            'created_at' => '2026-06-12 10:00:00',
+            'updated_at' => '2026-06-12 10:00:00',
+            'comment_count' => 1,
+            'unread_comment_count' => 0,
+        ],
+    ]);
+
+    assert_same(2, count($groups), 'Events should be split into two month groups.');
+    assert_same('July 2026', $groups[0]['label'], 'First month should preserve input order.');
+    assert_same(1, $groups[0]['event_count'], 'July should have one event.');
+    assert_same('Thursday, July 2, 2026', $groups[0]['days'][0]['label'], 'July day label should be readable.');
+    assert_same(2, $groups[1]['event_count'], 'June should have two events.');
+    assert_same(1, count($groups[1]['days']), 'June events on the same date should share one day group.');
+    assert_same(2, count($groups[1]['days'][0]['events']), 'June day should contain both events.');
+    assert_same('June 12, 2026', $groups[1]['days'][0]['events'][0]['event_date_label'], 'Event should receive display date label.');
+});
+
+test('feeling rates are formatted without unnecessary trailing zeros', function (): void {
+    assert_same('0', format_feeling_rate(0.0), 'Zero should format cleanly.');
+    assert_same('3.25', format_feeling_rate(3.25), 'Fractional rates should be preserved.');
+    assert_same('8.5', format_feeling_rate(8.5), 'Single decimal rates should not keep a trailing zero.');
+    assert_same('10', format_feeling_rate(10.0), 'Ten should format cleanly.');
+});
+
 test('schema includes required tables, constraints, and defaults', function () use ($root): void {
     $schema = file_get_contents($root . '/database/schema.sql');
 

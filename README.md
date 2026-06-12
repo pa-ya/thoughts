@@ -7,7 +7,7 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phase 1 project foundation, Phase 2 database schema, and Phase 3 login routing are implemented. The development plan is tracked in `TASKS.md`.
+Phase 1 project foundation, Phase 2 database schema, Phase 3 login routing, and Phase 4 timeline read view are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
 
@@ -175,7 +175,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 3 is complete. Phase 4, timeline read view, is next.
+Current status: Phase 4 is complete. Phase 5, admin event creation, is next.
 
 ## Tests
 
@@ -185,7 +185,7 @@ Run the current PHP test suite from the project root:
 php tests/run.php
 ```
 
-The current tests cover configuration loading, password role resolution, session role helpers, domain constants, and schema smoke checks.
+The current tests cover configuration loading, password role resolution, session role helpers, domain constants, timeline grouping, feeling-rate formatting, and schema smoke checks.
 
 Recommended order:
 
