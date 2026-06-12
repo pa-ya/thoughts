@@ -232,7 +232,7 @@ test('schema includes required tables, constraints, and defaults', function () u
     $schema = file_get_contents($root . '/database/schema.sql');
 
     if ($schema === false) {
-        throw new RuntimeException('Could not read database/schema.sql.');
+        throw new RuntimeException('Could not read thoughts-api/database/schema.sql.');
     }
 
     assert_contains('CREATE TABLE IF NOT EXISTS events', $schema, 'Schema should create events table.');

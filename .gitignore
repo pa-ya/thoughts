@@ -1,11 +1,15 @@
 # Local secrets and machine-specific settings
-config.local.php
+thoughts-api/config.local.php
+thoughts-api/.env
 .env
+config.local.php
 
 # Runtime files
 *.log
 tmp/
 cache/
+thoughts-api/tmp/
+thoughts-api/cache/
 
 # Dependencies and editor noise
 vendor/

@@ -55,30 +55,39 @@ Month
 - CSS for responsive styling and themes.
 - Small JavaScript layer for modals, accordions, form helpers, and UI interactions.
 
-## Planned Project Structure
+## Project Structure
 
 ```text
 .
 ├── README.md
 ├── TASKS.md
-├── config.example.php
-├── database/
-│   └── schema.sql
 ├── public/
 │   ├── index.php
 │   ├── dashboard.php
+│   ├── create_event.php
+│   ├── logout.php
 │   └── assets/
 │       ├── css/
 │       │   └── app.css
 │       └── js/
 │           └── app.js
-└── src/
-    ├── auth.php
-    ├── comments.php
-    ├── config.php
-    ├── database.php
-    └── events.php
+└── thoughts-api/
+    ├── .env
+    ├── config.example.php
+    ├── database/
+    │   ├── schema.sql
+    │   └── charset_migration.sql
+    ├── src/
+    │   ├── auth.php
+    │   ├── comments.php
+    │   ├── config.php
+    │   ├── database.php
+    │   └── events.php
+    └── tests/
+        └── run.php
 ```
+
+For cPanel, set the domain document root to `public/`. If cPanel uses `public_html`, place the contents of `public/` there and keep `thoughts-api/` as a sibling directory outside the web root.
 
 ## Planned Database Tables
 
@@ -182,7 +191,7 @@ Current status: Phase 5 is complete. Phase 6, event detail modal, is next.
 Run the current PHP test suite from the project root:
 
 ```bash
-php tests/run.php
+php thoughts-api/tests/run.php
 ```
 
 The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event validation, timeline grouping, feeling-rate formatting, and schema smoke checks.
@@ -206,8 +215,8 @@ Recommended order:
 The final setup will likely follow this shape:
 
 1. Create a MySQL database.
-2. Import `database/schema.sql`.
-3. Copy `config.example.php` to the real local config file.
+2. Import `thoughts-api/database/schema.sql`.
+3. Copy `thoughts-api/config.example.php` to the real local config file.
 4. Set database credentials.
 5. Generate password hashes for admin and viewer passwords.
 6. Start PHP's local server from the `public` directory:

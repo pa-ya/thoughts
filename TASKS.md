@@ -15,14 +15,14 @@ Goal: Create the base project structure and configuration.
   - `public/dashboard.php` for the shared timeline view.
   - `public/assets/css/app.css` for styles.
   - `public/assets/js/app.js` for browser behavior.
-  - `src/config.php` for application settings.
-  - `src/database.php` for PDO connection setup.
-  - `src/auth.php` for session and role handling.
-  - `src/events.php` for event data access.
-  - `src/comments.php` for comment data access.
-  - `database/schema.sql` for MySQL schema.
+  - `thoughts-api/src/config.php` for application settings.
+  - `thoughts-api/src/database.php` for PDO connection setup.
+  - `thoughts-api/src/auth.php` for session and role handling.
+  - `thoughts-api/src/events.php` for event data access.
+  - `thoughts-api/src/comments.php` for comment data access.
+  - `thoughts-api/database/schema.sql` for MySQL schema.
 - Add `.gitignore` for local config and generated files.
-- Add `config.example.php` showing required settings without secrets.
+- Add `thoughts-api/config.example.php` showing required settings without secrets.
 - Use PHP sessions for login state.
 - Define two roles:
   - `admin`: can create, edit, delete, view events, and read comments.
@@ -71,7 +71,7 @@ Goal: Design the database tables for events, comments, and future customization.
 
 Acceptance criteria:
 
-- Fresh database can be created from `database/schema.sql`.
+- Fresh database can be created from `thoughts-api/database/schema.sql`.
 - Event and comment relationships are enforced.
 - Queries can efficiently group events by month and day.
 

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../src/auth.php';
-require_once __DIR__ . '/../src/events.php';
+require_once __DIR__ . '/../thoughts-api/src/auth.php';
+require_once __DIR__ . '/../thoughts-api/src/events.php';
 
 start_app_session();
 
