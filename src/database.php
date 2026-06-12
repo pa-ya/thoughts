@@ -21,11 +21,21 @@ function db(): PDO
         $database['charset']
     );
 
-    $pdo = new PDO($dsn, $database['user'], $database['password'], [
+    $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
-    ]);
+    ];
+
+    if (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
+        $options[PDO::MYSQL_ATTR_INIT_COMMAND] = sprintf(
+            'SET NAMES %s COLLATE %s',
+            $database['charset'],
+            $database['collation']
+        );
+    }
+
+    $pdo = new PDO($dsn, $database['user'], $database['password'], $options);
 
     return $pdo;
 }

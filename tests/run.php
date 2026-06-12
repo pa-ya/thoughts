@@ -14,6 +14,7 @@ putenv('DB_NAME=thoughts_test');
 putenv('DB_USER=test_user');
 putenv('DB_PASSWORD=test_password');
 putenv('DB_CHARSET=utf8mb4');
+putenv('DB_COLLATION=utf8mb4_0900_ai_ci');
 putenv('ADMIN_PASSWORD_HASH=' . password_hash('admin-secret', PASSWORD_DEFAULT));
 putenv('VIEWER_PASSWORD_HASH=' . password_hash('viewer-secret', PASSWORD_DEFAULT));
 
@@ -68,6 +69,8 @@ test('configuration loads deterministic test values', function (): void {
     assert_same('UTC', config_get('app.timezone'), 'Timezone should come from the environment.');
     assert_same(false, config_get('app.secure_cookies'), 'Secure cookie flag should parse false.');
     assert_same(3307, config_get('database.port'), 'Database port should be cast to an integer.');
+    assert_same('utf8mb4', config_get('database.charset'), 'Database charset should support Persian and emojis.');
+    assert_same('utf8mb4_0900_ai_ci', config_get('database.collation'), 'Database collation should use MySQL 8 Unicode 9 collation.');
     assert_same('fallback', config_get('missing.path', 'fallback'), 'Missing config path should return the fallback.');
 });
 
