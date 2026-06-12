@@ -7,7 +7,7 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phase 1 project foundation is implemented. The development plan is tracked in `TASKS.md`.
+Phase 1 project foundation and Phase 2 database schema are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
 
@@ -175,7 +175,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 1 is complete. Phase 2, database schema, is next.
+Current status: Phase 2 is complete. Phase 3, login and role routing, is next.
 
 Recommended order:
 
