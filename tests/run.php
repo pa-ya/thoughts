@@ -107,10 +107,65 @@ test('session role helpers accept only known roles', function (): void {
     assert_true($thrown, 'Unknown sign-in role should throw.');
 });
 
+test('csrf token is stable and verifiable inside a session', function (): void {
+    start_app_session();
+    $_SESSION = [];
+
+    $token = csrf_token();
+
+    assert_true($token !== '', 'CSRF token should not be empty.');
+    assert_same($token, csrf_token(), 'CSRF token should be stable within one session.');
+    assert_true(verify_csrf_token($token), 'Current CSRF token should verify.');
+    assert_true(!verify_csrf_token('wrong-token'), 'Wrong CSRF token should fail.');
+    assert_true(!verify_csrf_token(null), 'Missing CSRF token should fail.');
+});
+
 test('domain constants match field requirements', function (): void {
     assert_same(1024, event_field_max_length(), 'Event text fields should allow 1024 characters.');
     assert_same(['min' => 0.0, 'max' => 10.0], feeling_rate_bounds(), 'Feeling rate bounds should be 0 to 10.');
     assert_same(1024, comment_field_max_length(), 'Comment field should allow 1024 characters.');
+});
+
+test('event validation accepts valid input and normalizes data', function (): void {
+    $result = validate_event_input([
+        'event_date' => '2026-06-12',
+        'event_text' => '  A useful event  ',
+        'thoughts' => '  Clear thoughts  ',
+        'physical_effect' => '  Calm breathing  ',
+        'feeling_rate' => '7.5',
+    ]);
+
+    assert_same([], $result['errors'], 'Valid event input should have no errors.');
+    assert_same('2026-06-12', $result['data']['event_date'], 'Date should be preserved.');
+    assert_same('A useful event', $result['data']['event_text'], 'Event text should be trimmed.');
+    assert_same('Clear thoughts', $result['data']['thoughts'], 'Thoughts should be trimmed.');
+    assert_same('Calm breathing', $result['data']['physical_effect'], 'Physical effect should be trimmed.');
+    assert_same('7.50', $result['data']['feeling_rate'], 'Feeling rate should be normalized for DECIMAL storage.');
+});
+
+test('event validation rejects invalid input', function (): void {
+    $result = validate_event_input([
+        'event_date' => '2026-02-30',
+        'event_text' => '',
+        'thoughts' => str_repeat('a', 1025),
+        'physical_effect' => 'Effect',
+        'feeling_rate' => '10.01',
+    ]);
+
+    assert_true(isset($result['errors']['event_date']), 'Invalid date should be rejected.');
+    assert_true(isset($result['errors']['event_text']), 'Empty event should be rejected.');
+    assert_true(isset($result['errors']['thoughts']), 'Overlong thoughts should be rejected.');
+    assert_true(isset($result['errors']['feeling_rate']), 'Out-of-range rate should be rejected.');
+
+    $precisionResult = validate_event_input([
+        'event_date' => '2026-06-12',
+        'event_text' => 'Event',
+        'thoughts' => 'Thoughts',
+        'physical_effect' => 'Effect',
+        'feeling_rate' => '7.123',
+    ]);
+
+    assert_true(isset($precisionResult['errors']['feeling_rate']), 'Rates with more than 2 decimals should be rejected.');
 });
 
 test('timeline grouping nests events by month and day', function (): void {

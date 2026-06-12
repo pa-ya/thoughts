@@ -72,6 +72,38 @@ function require_authenticated_user(): string
     return $role;
 }
 
+function require_admin_user(): void
+{
+    $role = require_authenticated_user();
+
+    if ($role !== ROLE_ADMIN) {
+        http_response_code(403);
+        echo 'Forbidden';
+        exit;
+    }
+}
+
+function csrf_token(): string
+{
+    start_app_session();
+
+    if (!isset($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    return $_SESSION['csrf_token'];
+}
+
+function verify_csrf_token(?string $token): bool
+{
+    start_app_session();
+
+    return is_string($token)
+        && isset($_SESSION['csrf_token'])
+        && is_string($_SESSION['csrf_token'])
+        && hash_equals($_SESSION['csrf_token'], $token);
+}
+
 function sign_in_as(string $role): void
 {
     if ($role !== ROLE_ADMIN && $role !== ROLE_VIEWER) {

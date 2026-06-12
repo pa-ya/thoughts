@@ -21,6 +21,87 @@ function feeling_rate_bounds(): array
     ];
 }
 
+function event_string_length(string $value): int
+{
+    return function_exists('mb_strlen') ? mb_strlen($value) : strlen($value);
+}
+
+function validate_event_input(array $input): array
+{
+    $errors = [];
+    $data = [];
+
+    $dateRaw = trim((string) ($input['event_date'] ?? ''));
+    $date = DateTimeImmutable::createFromFormat('!Y-m-d', $dateRaw);
+
+    if ($dateRaw === '' || !$date || $date->format('Y-m-d') !== $dateRaw) {
+        $errors['event_date'] = 'Choose a valid date.';
+    } else {
+        $data['event_date'] = $dateRaw;
+    }
+
+    $textFields = [
+        'event_text' => 'Event',
+        'thoughts' => 'Thoughts',
+        'physical_effect' => 'Physical Effect',
+    ];
+
+    foreach ($textFields as $field => $label) {
+        $value = trim((string) ($input[$field] ?? ''));
+
+        if ($value === '') {
+            $errors[$field] = $label . ' is required.';
+            continue;
+        }
+
+        if (event_string_length($value) > EVENT_TEXT_MAX_LENGTH) {
+            $errors[$field] = $label . ' must be 1024 characters or fewer.';
+            continue;
+        }
+
+        $data[$field] = $value;
+    }
+
+    $rateRaw = trim((string) ($input['feeling_rate'] ?? ''));
+
+    if ($rateRaw === '') {
+        $errors['feeling_rate'] = 'Feeling Rate is required.';
+    } elseif (!preg_match('/^\d+(?:\.\d{1,2})?$/', $rateRaw)) {
+        $errors['feeling_rate'] = 'Feeling Rate must be a number with at most 2 decimal places.';
+    } else {
+        $rate = (float) $rateRaw;
+
+        if ($rate < FEELING_RATE_MIN || $rate > FEELING_RATE_MAX) {
+            $errors['feeling_rate'] = 'Feeling Rate must be between 0 and 10.';
+        } else {
+            $data['feeling_rate'] = number_format($rate, 2, '.', '');
+        }
+    }
+
+    return [
+        'data' => $data,
+        'errors' => $errors,
+    ];
+}
+
+function create_event(array $data): int
+{
+    $statement = db()->prepare(
+        'INSERT INTO events (event_date, event_text, thoughts, physical_effect, feeling_rate)
+        VALUES (:event_date, :event_text, :thoughts, :physical_effect, :feeling_rate)'
+    );
+
+    $statement->execute([
+        'event_date' => $data['event_date'],
+        'event_text' => $data['event_text'],
+        'thoughts' => $data['thoughts'],
+        'physical_effect' => $data['physical_effect'],
+        'feeling_rate' => $data['feeling_rate'],
+    ]);
+
+    return (int) db()->lastInsertId();
+}
+
 function fetch_timeline_events(): array
 {
     $statement = db()->query(

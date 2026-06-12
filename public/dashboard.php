@@ -12,6 +12,23 @@ $currentRole = require_authenticated_user();
 $databaseStatus = database_health_check();
 $timelineGroups = [];
 $timelineError = null;
+$eventFormErrors = $_SESSION['event_form_errors'] ?? [];
+$eventFormOld = $_SESSION['event_form_old'] ?? [];
+$flash = $_SESSION['flash'] ?? null;
+
+unset($_SESSION['event_form_errors'], $_SESSION['event_form_old'], $_SESSION['flash']);
+
+if (!is_array($eventFormErrors)) {
+    $eventFormErrors = [];
+}
+
+if (!is_array($eventFormOld)) {
+    $eventFormOld = [];
+}
+
+if (!is_array($flash)) {
+    $flash = null;
+}
 
 if ($databaseStatus['ok']) {
     try {
@@ -21,6 +38,9 @@ if ($databaseStatus['ok']) {
         $timelineError = 'Timeline data is not available. Make sure the database schema has been imported.';
     }
 }
+
+$eventModalOpen = $currentRole === ROLE_ADMIN
+    && (($eventFormErrors !== []) || (string) ($_GET['event_modal'] ?? '') === '1');
 
 function e(string $value): string
 {
@@ -47,6 +67,18 @@ function event_preview(string $text): string
 
     return $preview . '...';
 }
+
+function old_event_value(array $old, string $field, string $default = ''): string
+{
+    return (string) ($old[$field] ?? $default);
+}
+
+function field_error(array $errors, string $field): ?string
+{
+    $error = $errors[$field] ?? null;
+
+    return is_string($error) ? $error : null;
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -65,10 +97,22 @@ function event_preview(string $text): string
                 <h1><?= e($appName) ?></h1>
             </div>
             <div class="header-actions">
+                <?php if ($currentRole === ROLE_ADMIN): ?>
+                    <button class="button button-icon" type="button" data-modal-open="event-modal" aria-label="Add event">
+                        <span aria-hidden="true">+</span>
+                        <span>Add Event</span>
+                    </button>
+                <?php endif; ?>
                 <span class="role-pill"><?= e(ucfirst($currentRole)) ?></span>
                 <a class="button button-secondary" href="logout.php">Logout</a>
             </div>
         </header>
+
+        <?php if ($flash !== null && isset($flash['message'], $flash['type'])): ?>
+            <p class="flash flash-<?= e((string) $flash['type']) ?>" role="status">
+                <?= e((string) $flash['message']) ?>
+            </p>
+        <?php endif; ?>
 
         <section class="dashboard-meta" aria-label="Dashboard status">
             <div>
@@ -181,5 +225,96 @@ function event_preview(string $text): string
             </section>
         <?php endif; ?>
     </main>
+
+    <?php if ($currentRole === ROLE_ADMIN): ?>
+        <div
+            class="modal-backdrop"
+            id="event-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="event-modal-title"
+            aria-hidden="<?= $eventModalOpen ? 'false' : 'true' ?>"
+            data-modal
+            <?= $eventModalOpen ? '' : 'hidden' ?>
+        >
+            <section class="modal-panel" data-modal-panel>
+                <div class="modal-header">
+                    <div>
+                        <p class="eyebrow">New Record</p>
+                        <h2 id="event-modal-title">Add Event</h2>
+                    </div>
+                    <button class="modal-close" type="button" data-modal-close aria-label="Close modal">x</button>
+                </div>
+
+                <?php if (($formError = field_error($eventFormErrors, 'form')) !== null): ?>
+                    <p class="alert alert-error" role="alert"><?= e($formError) ?></p>
+                <?php endif; ?>
+
+                <form class="event-form" method="post" action="create_event.php" novalidate>
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+
+                    <div class="form-field">
+                        <label for="event_date">Date</label>
+                        <input
+                            id="event_date"
+                            name="event_date"
+                            type="date"
+                            value="<?= e(old_event_value($eventFormOld, 'event_date', date('Y-m-d'))) ?>"
+                            required
+                        >
+                        <?php if (($error = field_error($eventFormErrors, 'event_date')) !== null): ?>
+                            <p class="input-error"><?= e($error) ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="event_text">Event</label>
+                        <textarea id="event_text" name="event_text" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" required><?= e(old_event_value($eventFormOld, 'event_text')) ?></textarea>
+                        <?php if (($error = field_error($eventFormErrors, 'event_text')) !== null): ?>
+                            <p class="input-error"><?= e($error) ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="thoughts">Thoughts</label>
+                        <textarea id="thoughts" name="thoughts" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" required><?= e(old_event_value($eventFormOld, 'thoughts')) ?></textarea>
+                        <?php if (($error = field_error($eventFormErrors, 'thoughts')) !== null): ?>
+                            <p class="input-error"><?= e($error) ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="physical_effect">Physical Effect</label>
+                        <textarea id="physical_effect" name="physical_effect" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" required><?= e(old_event_value($eventFormOld, 'physical_effect')) ?></textarea>
+                        <?php if (($error = field_error($eventFormErrors, 'physical_effect')) !== null): ?>
+                            <p class="input-error"><?= e($error) ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="feeling_rate">Feeling Rate</label>
+                        <input
+                            id="feeling_rate"
+                            name="feeling_rate"
+                            type="number"
+                            min="0"
+                            max="10"
+                            step="0.01"
+                            value="<?= e(old_event_value($eventFormOld, 'feeling_rate')) ?>"
+                            required
+                        >
+                        <?php if (($error = field_error($eventFormErrors, 'feeling_rate')) !== null): ?>
+                            <p class="input-error"><?= e($error) ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="button button-secondary" type="button" data-modal-close>Cancel</button>
+                        <button class="button" type="submit">Save Event</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    <?php endif; ?>
 </body>
 </html>
