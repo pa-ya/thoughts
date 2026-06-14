@@ -102,6 +102,56 @@ function create_event(array $data): int
     return (int) db()->lastInsertId();
 }
 
+function validate_event_id($value): ?int
+{
+    $eventId = filter_var($value, FILTER_VALIDATE_INT, [
+        'options' => [
+            'min_range' => 1,
+        ],
+    ]);
+
+    return $eventId === false ? null : (int) $eventId;
+}
+
+function event_exists(int $eventId): bool
+{
+    $statement = db()->prepare('SELECT 1 FROM events WHERE id = :id LIMIT 1');
+    $statement->execute(['id' => $eventId]);
+
+    return $statement->fetchColumn() !== false;
+}
+
+function update_event(int $eventId, array $data): void
+{
+    $statement = db()->prepare(
+        'UPDATE events
+        SET
+            event_date = :event_date,
+            event_text = :event_text,
+            thoughts = :thoughts,
+            physical_effect = :physical_effect,
+            feeling_rate = :feeling_rate
+        WHERE id = :id'
+    );
+
+    $statement->execute([
+        'id' => $eventId,
+        'event_date' => $data['event_date'],
+        'event_text' => $data['event_text'],
+        'thoughts' => $data['thoughts'],
+        'physical_effect' => $data['physical_effect'],
+        'feeling_rate' => $data['feeling_rate'],
+    ]);
+}
+
+function delete_event(int $eventId): bool
+{
+    $statement = db()->prepare('DELETE FROM events WHERE id = :id');
+    $statement->execute(['id' => $eventId]);
+
+    return $statement->rowCount() > 0;
+}
+
 function fetch_timeline_events(): array
 {
     $statement = db()->query(

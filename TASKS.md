@@ -2,7 +2,7 @@
 
 This project will be built as a pure PHP, HTML, CSS, and JavaScript application backed by MySQL. The plan below separates the work into phases so each phase produces a working, testable section of the app.
 
-Current status: Phase 8 is complete. Phase 9 is next.
+Current status: Phase 9 is complete. Phase 10 is next.
 
 ## Phase 1: Project Foundation
 
@@ -220,6 +220,8 @@ Acceptance criteria:
 - New viewer comments later create a new unread indicator.
 
 ## Phase 9: Admin Edit And Delete
+
+Status: Complete.
 
 Goal: Allow admin to maintain existing events.
 

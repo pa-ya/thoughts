@@ -357,7 +357,7 @@ function event_detail_json(array $event): string
                 <button class="modal-close" type="button" data-modal-close aria-label="Close modal">x</button>
             </div>
 
-            <dl class="detail-stats" aria-label="Event summary">
+            <dl class="detail-stats" aria-label="Event summary" data-detail-view>
                 <div>
                     <dt>Date</dt>
                     <dd data-detail-field="eventDateLabel"></dd>
@@ -372,7 +372,7 @@ function event_detail_json(array $event): string
                 </div>
             </dl>
 
-            <div class="detail-grid">
+            <div class="detail-grid" data-detail-view>
                 <section class="detail-section">
                     <h3>Thoughts</h3>
                     <p class="detail-text" data-detail-field="thoughts"></p>
@@ -384,21 +384,96 @@ function event_detail_json(array $event): string
             </div>
 
             <?php if ($currentRole === ROLE_ADMIN): ?>
-                <section class="detail-section detail-comments">
+                <section class="detail-section detail-comments" data-detail-view>
                     <h3>Comments</h3>
                     <div class="comments-list" data-admin-comments-list aria-live="polite">
                         <p class="detail-text" data-detail-field="adminCommentsPreview"></p>
                     </div>
                 </section>
 
-                <div class="modal-actions detail-actions">
-                    <button class="button button-secondary" type="button" disabled>Edit</button>
-                    <button class="button button-danger" type="button" disabled>Delete</button>
+                <div class="modal-actions detail-actions" data-detail-view>
+                    <button class="button button-secondary" type="button" data-edit-event>Edit</button>
+                    <form class="inline-form" method="post" action="delete_event.php" data-confirm="Delete this event? This cannot be undone.">
+                        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                        <input type="hidden" name="event_id" value="" data-event-id-input>
+                        <button class="button button-danger" type="submit">Delete</button>
+                    </form>
                 </div>
+
+                <form class="event-form edit-event-form" method="post" action="update_event.php" data-edit-event-form hidden novalidate>
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                    <input type="hidden" name="event_id" value="" data-event-id-input data-edit-field="id">
+
+                    <div class="form-field">
+                        <label for="edit_event_date">Date</label>
+                        <input
+                            id="edit_event_date"
+                            name="event_date"
+                            type="date"
+                            data-edit-field="eventDate"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-field">
+                        <label for="edit_event_text">Event</label>
+                        <textarea
+                            id="edit_event_text"
+                            name="event_text"
+                            maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>"
+                            rows="4"
+                            data-edit-field="eventText"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="edit_thoughts">Thoughts</label>
+                        <textarea
+                            id="edit_thoughts"
+                            name="thoughts"
+                            maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>"
+                            rows="4"
+                            data-edit-field="thoughts"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="edit_physical_effect">Physical Effect</label>
+                        <textarea
+                            id="edit_physical_effect"
+                            name="physical_effect"
+                            maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>"
+                            rows="4"
+                            data-edit-field="physicalEffect"
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="edit_feeling_rate">Feeling Rate</label>
+                        <input
+                            id="edit_feeling_rate"
+                            name="feeling_rate"
+                            type="number"
+                            min="0"
+                            max="10"
+                            step="0.01"
+                            data-edit-field="feelingRate"
+                            required
+                        >
+                    </div>
+
+                    <div class="modal-actions detail-actions">
+                        <button class="button button-secondary" type="button" data-edit-cancel>Cancel</button>
+                        <button class="button" type="submit">Save Changes</button>
+                    </div>
+                </form>
             <?php else: ?>
                 <form class="event-form comment-form" method="post" action="create_comment.php" novalidate>
                     <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-                    <input type="hidden" name="event_id" value="">
+                    <input type="hidden" name="event_id" value="" data-event-id-input>
                     <div class="form-field">
                         <label for="detail-comment">Comment</label>
                         <textarea id="detail-comment" name="comment_text" maxlength="<?= COMMENT_TEXT_MAX_LENGTH ?>" rows="4" required></textarea>

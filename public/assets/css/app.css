@@ -630,6 +630,10 @@ body.modal-open {
     .modal-actions .button {
         width: 100%;
     }
+
+    .inline-form {
+        width: 100%;
+    }
 }
 
 .button:disabled,
@@ -725,6 +729,19 @@ body.modal-open {
 .detail-comments,
 .comment-form {
     margin-top: 12px;
+}
+
+.edit-event-form {
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+}
+
+.inline-form {
+    margin: 0;
+}
+
+.detail-actions {
+    flex-wrap: wrap;
 }
 
 .comments-list {

@@ -5,7 +5,7 @@ const openModal = (modal) => {
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
 
-    const focusTarget = modal.querySelector('input:not([disabled]), textarea:not([disabled]), button:not([disabled]), select:not([disabled]), a[href]');
+    const focusTarget = modal.querySelector('input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), button:not([disabled]), select:not([disabled]), a[href]');
 
     if (focusTarget instanceof HTMLElement) {
         focusTarget.focus();
@@ -44,6 +44,48 @@ const detailValue = (value) => {
     }
 
     return '';
+};
+
+const setEditMode = (modal, isEditing) => {
+    modal.querySelectorAll('[data-detail-view]').forEach((section) => {
+        if (section instanceof HTMLElement) {
+            section.hidden = isEditing;
+        }
+    });
+
+    const editForm = modal.querySelector('[data-edit-event-form]');
+
+    if (editForm instanceof HTMLElement) {
+        editForm.hidden = !isEditing;
+    }
+
+    if (isEditing && editForm instanceof HTMLElement) {
+        const focusTarget = editForm.querySelector('input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), button:not([disabled])');
+
+        if (focusTarget instanceof HTMLElement) {
+            focusTarget.focus();
+        }
+    }
+};
+
+const fillEditForm = (modal, detail) => {
+    const values = {
+        id: detailValue(detail.id),
+        eventDate: detailValue(detail.eventDate),
+        eventText: detailValue(detail.eventText),
+        thoughts: detailValue(detail.thoughts),
+        physicalEffect: detailValue(detail.physicalEffect),
+        feelingRate: detailValue(detail.feelingRate),
+    };
+
+    modal.querySelectorAll('[data-edit-field]').forEach((field) => {
+        if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) {
+            return;
+        }
+
+        const key = field.getAttribute('data-edit-field');
+        field.value = key && Object.prototype.hasOwnProperty.call(values, key) ? values[key] : '';
+    });
 };
 
 const renderAdminCommentsMessage = (modal, message, type = '') => {
@@ -208,6 +250,7 @@ const fillEventDetailModal = (modal, detail) => {
     const count = Number.parseInt(detail.commentCount, 10) || 0;
     const unread = Number.parseInt(detail.unreadCommentCount, 10) || 0;
     modal.dataset.activeEventId = detailValue(detail.id);
+    setEditMode(modal, false);
     const values = {
         eventText: detailValue(detail.eventText),
         eventDateLabel: detailValue(detail.eventDateLabel || detail.eventDate),
@@ -227,11 +270,13 @@ const fillEventDetailModal = (modal, detail) => {
         field.textContent = key && Object.prototype.hasOwnProperty.call(values, key) ? values[key] : '';
     });
 
-    const eventId = modal.querySelector('input[name="event_id"]');
+    modal.querySelectorAll('[data-event-id-input]').forEach((eventId) => {
+        if (eventId instanceof HTMLInputElement) {
+            eventId.value = detailValue(detail.id);
+        }
+    });
 
-    if (eventId instanceof HTMLInputElement) {
-        eventId.value = detailValue(detail.id);
-    }
+    fillEditForm(modal, detail);
 
     const commentText = modal.querySelector('textarea[name="comment_text"]');
 
@@ -299,6 +344,30 @@ document.addEventListener('click', (event) => {
         return;
     }
 
+    const editButton = target.closest('[data-edit-event]');
+
+    if (editButton instanceof HTMLElement) {
+        const modal = editButton.closest('[data-modal]');
+
+        if (modal instanceof HTMLElement) {
+            setEditMode(modal, true);
+        }
+
+        return;
+    }
+
+    const editCancel = target.closest('[data-edit-cancel]');
+
+    if (editCancel instanceof HTMLElement) {
+        const modal = editCancel.closest('[data-modal]');
+
+        if (modal instanceof HTMLElement) {
+            setEditMode(modal, false);
+        }
+
+        return;
+    }
+
     const opener = target.closest('[data-modal-open]');
 
     if (opener instanceof HTMLElement) {
@@ -355,6 +424,20 @@ document.addEventListener('keydown', (event) => {
     if (detailTrigger instanceof HTMLElement) {
         event.preventDefault();
         openEventDetail(detailTrigger);
+    }
+});
+
+document.addEventListener('submit', (event) => {
+    const form = event.target;
+
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    const message = form.getAttribute('data-confirm');
+
+    if (message && !window.confirm(message)) {
+        event.preventDefault();
     }
 });
 

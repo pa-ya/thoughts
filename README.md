@@ -7,7 +7,7 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phases 1 through 8 are implemented. The development plan is tracked in `TASKS.md`.
+Phases 1 through 9 are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
 
@@ -22,11 +22,11 @@ Implemented:
 - Viewer comment submission for each event.
 - Admin unread comment indicators.
 - Admin comment review with read tracking.
+- Admin event editing and deleting.
 - Responsive baseline interface for mobile, tablet, and desktop.
 
 Planned:
 
-- Admin event editing and deleting.
 - Customization for theme, colors, font size, font family, and density.
 
 ## Event Fields
@@ -72,8 +72,10 @@ Month
 │   ├── index.php
 │   ├── dashboard.php
 │   ├── create_comment.php
+│   ├── delete_event.php
 │   ├── event_comments.php
 │   ├── create_event.php
+│   ├── update_event.php
 │   ├── logout.php
 │   └── assets/
 │       ├── css/
@@ -193,7 +195,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 8 is complete. Phase 9, admin edit/delete, is next.
+Current status: Phase 9 is complete. Phase 10, responsive UI and visual design, is next.
 
 ## Tests
 
@@ -203,7 +205,7 @@ Run the current PHP test suite from the project root:
 php thoughts-api/tests/run.php
 ```
 
-The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event validation, comment validation, comment review payloads, timeline grouping, event detail payloads, feeling-rate formatting, and schema smoke checks.
+The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event id validation, event validation, comment validation, comment review payloads, timeline grouping, event detail payloads, feeling-rate formatting, and schema smoke checks.
 
 Recommended order:
 

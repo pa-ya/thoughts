@@ -129,6 +129,14 @@ test('domain constants match field requirements', function (): void {
     assert_same(1024, comment_field_max_length(), 'Comment field should allow 1024 characters.');
 });
 
+test('event id validation accepts only positive integers', function (): void {
+    assert_same(12, validate_event_id('12'), 'Positive numeric event id should be accepted.');
+    assert_same(12, validate_event_id(12), 'Positive integer event id should be accepted.');
+    assert_null(validate_event_id('0'), 'Zero event id should be rejected.');
+    assert_null(validate_event_id('-4'), 'Negative event id should be rejected.');
+    assert_null(validate_event_id('abc'), 'Non-numeric event id should be rejected.');
+});
+
 test('comment validation accepts valid input and normalizes data', function (): void {
     $result = validate_comment_input([
         'event_id' => '12',
