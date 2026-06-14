@@ -224,6 +224,7 @@ function event_detail_json(array $event): string
             </section>
         <?php else: ?>
             <div class="view-toolbar">
+                <p class="view-toolbar-info"><strong><?= count($timelineEvents) ?></strong> <?= count($timelineEvents) === 1 ? 'event' : 'events' ?></p>
                 <label class="view-switch">
                     <input type="checkbox" class="view-switch-input" data-table-view-toggle>
                     <span class="view-switch-track" aria-hidden="true"><span class="view-switch-thumb"></span></span>

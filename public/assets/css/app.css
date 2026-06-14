@@ -2229,6 +2229,69 @@ h1 {
 
 @media (max-width: 640px) {
     .view-toolbar {
-        justify-content: flex-start;
+        justify-content: space-between;
     }
+}
+
+/* =====================================================================
+   Phase 17 final polish: cohesion and finishing micro-details
+   ===================================================================== */
+
+/* Cards share the same slim accent rule as the modal panels, so login,
+   empty states and setup panels all read as one branded family. */
+.panel {
+    border-top: 3px solid var(--accent);
+}
+
+/* The database indicator gets a soft status dot */
+.dashboard-meta .status-ok::before,
+.dashboard-meta .status-error::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-inline-end: 9px;
+    border-radius: 999px;
+    vertical-align: middle;
+}
+
+.dashboard-meta .status-ok::before {
+    background: var(--success);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 16%, transparent);
+}
+
+.dashboard-meta .status-error::before {
+    background: var(--danger);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 16%, transparent);
+}
+
+/* Numerals line up cleanly wherever they cluster (rates, dates, counts) */
+.feeling-chip-num,
+.cell-date-main,
+.accordion-subtitle,
+.view-toolbar-info strong {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Table toolbar: a quiet event count balances the switch on the right */
+.view-toolbar {
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.view-toolbar-info {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.view-toolbar-info strong {
+    color: var(--text);
+    font-weight: 800;
+}
+
+/* Empty / setup states read a touch calmer and more centered */
+.empty-state .notice {
+    max-width: 46rem;
 }
