@@ -1611,19 +1611,20 @@ body[data-theme="dark"] .segmented-options input:checked + span {
     color: var(--success);
 }
 
-/* Timeline event card: full event, thoughts and physical effect, nicely structured */
+/* Timeline event card: full event, thoughts and physical effect, inline "Label: value" */
 .event-item {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: clamp(15px, 2.4vw, 19px);
+    gap: 12px;
+    padding: clamp(16px, 2.2vw, 20px);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 60%, transparent), 0 6px 18px rgba(15, 23, 42, 0.05);
 }
 
 .event-head {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px 12px;
+    gap: 9px 12px;
 }
 
 .event-head .event-badges {
@@ -1634,42 +1635,40 @@ body[data-theme="dark"] .segmented-options input:checked + span {
 .event-date {
     color: var(--muted);
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
 }
 
 .event-body {
     display: flex;
     flex-direction: column;
-    gap: 13px;
+    gap: 8px;
 }
 
+/* Each field is one flowing line: "Label: value", value wraps to the next line only when long */
 .event-field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-}
-
-.event-field-label {
     margin: 0;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
-
-.event-field-text {
-    margin: 0;
-    line-height: 1.62;
-    white-space: pre-wrap;
+    line-height: 1.6;
     overflow-wrap: anywhere;
 }
 
-.event-field-primary .event-field-text {
-    font-size: 1.04rem;
-    font-weight: 600;
+.event-field-label {
+    color: var(--muted);
+    font-weight: 800;
+    white-space: nowrap;
+    margin-inline-end: 7px;
+}
+
+.event-field-value {
     color: var(--text);
+    unicode-bidi: isolate;
+}
+
+.event-field-primary {
+    font-size: 1.05rem;
+}
+
+.event-field-primary .event-field-value {
+    font-weight: 600;
 }
 
 .event-foot {
@@ -1754,6 +1753,32 @@ body[data-theme="dark"] .segmented-options input:checked + span {
 
 .detail-comments h3 {
     color: var(--muted);
+}
+
+/* Tighter timeline nesting so cards do not sit inside heavy frame-in-frame padding */
+.month-panel {
+    gap: 12px;
+    padding: 12px;
+}
+
+.day-panel {
+    padding: 10px 11px;
+}
+
+.event-list {
+    gap: 11px;
+}
+
+/* Dark mode: the day panel used a translucent white background that read as a gray
+   frame around each card. Let the card sit directly on the panel surface instead. */
+body[data-theme="dark"] .day-panel {
+    background: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+    body[data-theme="system"] .day-panel {
+        background: transparent;
+    }
 }
 
 @media (max-width: 640px) {

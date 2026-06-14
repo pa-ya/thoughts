@@ -279,23 +279,23 @@ function event_detail_json(array $event): string
                                                     </header>
 
                                                     <div class="event-body">
-                                                        <section class="event-field event-field-primary">
-                                                            <h3 class="event-field-label">Event</h3>
-                                                            <p class="event-field-text" dir="auto"><?= e((string) $event['event_text']) ?></p>
-                                                        </section>
+                                                        <p class="event-field event-field-primary">
+                                                            <span class="event-field-label">Event:</span>
+                                                            <span class="event-field-value" dir="auto"><?= e((string) $event['event_text']) ?></span>
+                                                        </p>
 
                                                         <?php if ($thoughtsText !== ''): ?>
-                                                            <section class="event-field">
-                                                                <h4 class="event-field-label">Thoughts</h4>
-                                                                <p class="event-field-text" dir="auto"><?= e($thoughtsText) ?></p>
-                                                            </section>
+                                                            <p class="event-field">
+                                                                <span class="event-field-label">Thoughts:</span>
+                                                                <span class="event-field-value" dir="auto"><?= e($thoughtsText) ?></span>
+                                                            </p>
                                                         <?php endif; ?>
 
                                                         <?php if ($physicalText !== ''): ?>
-                                                            <section class="event-field">
-                                                                <h4 class="event-field-label">Physical Effect</h4>
-                                                                <p class="event-field-text" dir="auto"><?= e($physicalText) ?></p>
-                                                            </section>
+                                                            <p class="event-field">
+                                                                <span class="event-field-label">Physical Effect:</span>
+                                                                <span class="event-field-value" dir="auto"><?= e($physicalText) ?></span>
+                                                            </p>
                                                         <?php endif; ?>
                                                     </div>
 
