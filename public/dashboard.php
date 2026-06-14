@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../thoughts-api/src/auth.php';
 require_once __DIR__ . '/../thoughts-api/src/events.php';
 require_once __DIR__ . '/../thoughts-api/src/comments.php';
+require_once __DIR__ . '/../thoughts-api/src/settings.php';
 
 start_app_session();
 
@@ -13,6 +14,7 @@ $currentRole = require_authenticated_user();
 $databaseStatus = database_health_check();
 $timelineGroups = [];
 $timelineError = null;
+$visualSettings = default_visual_settings();
 $eventFormErrors = $_SESSION['event_form_errors'] ?? [];
 $eventFormOld = $_SESSION['event_form_old'] ?? [];
 $flash = $_SESSION['flash'] ?? null;
@@ -33,6 +35,12 @@ if (!is_array($flash)) {
 
 if ($databaseStatus['ok']) {
     try {
+        $visualSettings = fetch_visual_settings();
+    } catch (Throwable $exception) {
+        error_log('Settings query failed: ' . $exception->getMessage());
+    }
+
+    try {
         $timelineGroups = group_events_by_month_day(fetch_timeline_events());
     } catch (Throwable $exception) {
         error_log('Timeline query failed: ' . $exception->getMessage());
@@ -42,6 +50,8 @@ if ($databaseStatus['ok']) {
 
 $eventModalOpen = $currentRole === ROLE_ADMIN
     && (($eventFormErrors !== []) || (string) ($_GET['event_modal'] ?? '') === '1');
+$settingsModalOpen = $currentRole === ROLE_ADMIN
+    && (string) ($_GET['settings_modal'] ?? '') === '1';
 
 function e(string $value): string
 {
@@ -81,6 +91,16 @@ function field_error(array $errors, string $field): ?string
     return is_string($error) ? $error : null;
 }
 
+function selected_if(string $actual, string $expected): string
+{
+    return $actual === $expected ? 'selected' : '';
+}
+
+function checked_if(string $actual, string $expected): string
+{
+    return $actual === $expected ? 'checked' : '';
+}
+
 function event_detail_json(array $event): string
 {
     return json_encode(
@@ -90,7 +110,7 @@ function event_detail_json(array $event): string
 }
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="en" style="<?= e(visual_settings_style_attribute($visualSettings)) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -98,7 +118,10 @@ function event_detail_json(array $event): string
     <link rel="stylesheet" href="assets/css/app.css">
     <script src="assets/js/app.js" defer></script>
 </head>
-<body>
+<body
+    data-theme="<?= e($visualSettings['theme_mode']) ?>"
+    data-density="<?= e($visualSettings['density']) ?>"
+>
     <main class="dashboard-shell">
         <header class="dashboard-header">
             <div>
@@ -107,6 +130,10 @@ function event_detail_json(array $event): string
             </div>
             <div class="header-actions">
                 <?php if ($currentRole === ROLE_ADMIN): ?>
+                    <button class="button button-secondary button-icon" type="button" data-modal-open="settings-modal" aria-label="Open settings">
+                        <span aria-hidden="true">*</span>
+                        <span>Settings</span>
+                    </button>
                     <button class="button button-icon" type="button" data-modal-open="event-modal" aria-label="Add event">
                         <span aria-hidden="true">+</span>
                         <span>Add Event</span>
@@ -327,6 +354,134 @@ function event_detail_json(array $event): string
                     <div class="modal-actions">
                         <button class="button button-secondary" type="button" data-modal-close>Cancel</button>
                         <button class="button" type="submit">Save Event</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($currentRole === ROLE_ADMIN): ?>
+        <div
+            class="modal-backdrop"
+            id="settings-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-modal-title"
+            aria-hidden="<?= $settingsModalOpen ? 'false' : 'true' ?>"
+            data-modal
+            <?= $settingsModalOpen ? '' : 'hidden' ?>
+        >
+            <section class="modal-panel" data-modal-panel>
+                <div class="modal-header">
+                    <div>
+                        <p class="eyebrow">Appearance</p>
+                        <h2 id="settings-modal-title">Settings</h2>
+                    </div>
+                    <button class="modal-close" type="button" data-modal-close aria-label="Close modal">x</button>
+                </div>
+
+                <form class="event-form settings-form" method="post" action="update_settings.php" novalidate>
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+
+                    <fieldset class="settings-group">
+                        <legend>Theme</legend>
+                        <div class="segmented-options">
+                            <?php foreach (visual_theme_mode_options() as $value => $label): ?>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="theme_mode"
+                                        value="<?= e($value) ?>"
+                                        <?= checked_if((string) $visualSettings['theme_mode'], (string) $value) ?>
+                                    >
+                                    <span><?= e($label) ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </fieldset>
+
+                    <div class="settings-grid">
+                        <div class="form-field">
+                            <label for="accent_color">Accent Color</label>
+                            <div class="color-control">
+                                <input
+                                    id="accent_color"
+                                    name="accent_color"
+                                    type="color"
+                                    value="<?= e($visualSettings['accent_color']) ?>"
+                                    aria-label="Accent color"
+                                >
+                                <input
+                                    name="accent_color_text"
+                                    type="text"
+                                    value="<?= e($visualSettings['accent_color']) ?>"
+                                    aria-label="Accent color value"
+                                    data-color-text
+                                    readonly
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="font_family">Font Family</label>
+                            <select id="font_family" name="font_family">
+                                <?php foreach (visual_font_family_options() as $value => $label): ?>
+                                    <option value="<?= e($value) ?>" <?= selected_if((string) $visualSettings['font_family'], (string) $value) ?>>
+                                        <?= e($label) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="form-field">
+                            <label for="base_font_size">Base Font Size</label>
+                            <div class="range-control">
+                                <input
+                                    id="base_font_size"
+                                    name="base_font_size"
+                                    type="range"
+                                    min="14"
+                                    max="20"
+                                    step="1"
+                                    value="<?= e($visualSettings['base_font_size']) ?>"
+                                    data-range-control="base_font_size_number"
+                                >
+                                <input
+                                    id="base_font_size_number"
+                                    type="number"
+                                    min="14"
+                                    max="20"
+                                    step="1"
+                                    value="<?= e($visualSettings['base_font_size']) ?>"
+                                    data-range-value="base_font_size"
+                                    aria-label="Base font size value"
+                                >
+                            </div>
+                        </div>
+
+                        <fieldset class="settings-group settings-group-inline">
+                            <legend>Density</legend>
+                            <div class="segmented-options">
+                                <?php foreach (visual_density_options() as $value => $label): ?>
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="density"
+                                            value="<?= e($value) ?>"
+                                            <?= checked_if((string) $visualSettings['density'], (string) $value) ?>
+                                        >
+                                        <span><?= e($label) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="button button-secondary" type="button" data-modal-close>Cancel</button>
+                        <button class="button" type="submit">Save Settings</button>
                     </div>
                 </form>
             </section>

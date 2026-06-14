@@ -2,7 +2,7 @@
 
 This project will be built as a pure PHP, HTML, CSS, and JavaScript application backed by MySQL. The plan below separates the work into phases so each phase produces a working, testable section of the app.
 
-Current status: Phase 10 is complete. Phase 11 is next.
+Current status: Phase 11 is complete. Phase 12 is next.
 
 ## Phase 1: Project Foundation
 
@@ -277,6 +277,8 @@ Acceptance criteria:
 - Keyboard navigation works for login, modals, and accordions.
 
 ## Phase 11: Customization Settings
+
+Status: Complete.
 
 Goal: Add admin-controlled visual customization.
 

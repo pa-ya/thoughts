@@ -21,6 +21,7 @@ putenv('VIEWER_PASSWORD_HASH=' . password_hash('viewer-secret', PASSWORD_DEFAULT
 require_once $root . '/src/auth.php';
 require_once $root . '/src/events.php';
 require_once $root . '/src/comments.php';
+require_once $root . '/src/settings.php';
 
 $tests = [];
 
@@ -127,6 +128,54 @@ test('domain constants match field requirements', function (): void {
     assert_same(1024, event_field_max_length(), 'Event text fields should allow 1024 characters.');
     assert_same(['min' => 0.0, 'max' => 10.0], feeling_rate_bounds(), 'Feeling rate bounds should be 0 to 10.');
     assert_same(1024, comment_field_max_length(), 'Comment field should allow 1024 characters.');
+});
+
+test('visual settings validation accepts safe values and normalizes data', function (): void {
+    $result = validate_visual_settings_input([
+        'theme_mode' => 'dark',
+        'accent_color' => '#ABCDEF',
+        'base_font_size' => '18',
+        'font_family' => 'serif',
+        'density' => 'compact',
+    ]);
+
+    assert_same([], $result['errors'], 'Valid visual settings should have no errors.');
+    assert_same('dark', $result['data']['theme_mode'], 'Theme mode should be preserved.');
+    assert_same('#abcdef', $result['data']['accent_color'], 'Accent color should normalize to lowercase.');
+    assert_same('18', $result['data']['base_font_size'], 'Font size should normalize to string integer.');
+    assert_same('serif', $result['data']['font_family'], 'Font family should be preserved.');
+    assert_same('compact', $result['data']['density'], 'Density should be preserved.');
+});
+
+test('visual settings validation rejects unsafe values', function (): void {
+    $result = validate_visual_settings_input([
+        'theme_mode' => 'neon',
+        'accent_color' => 'javascript:alert(1)',
+        'base_font_size' => '30',
+        'font_family' => 'remote',
+        'density' => 'tiny',
+    ]);
+
+    assert_true(isset($result['errors']['theme_mode']), 'Unknown theme mode should be rejected.');
+    assert_true(isset($result['errors']['accent_color']), 'Unsafe accent color should be rejected.');
+    assert_true(isset($result['errors']['base_font_size']), 'Out-of-range font size should be rejected.');
+    assert_true(isset($result['errors']['font_family']), 'Unknown font family should be rejected.');
+    assert_true(isset($result['errors']['density']), 'Unknown density should be rejected.');
+});
+
+test('visual settings style attribute exposes CSS custom properties', function (): void {
+    $style = visual_settings_style_attribute([
+        'theme_mode' => 'light',
+        'accent_color' => '#10b981',
+        'base_font_size' => '17',
+        'font_family' => 'mono',
+        'density' => 'comfortable',
+    ]);
+
+    assert_contains('--accent: #10b981', $style, 'Style should include accent color.');
+    assert_contains('--accent-strong:', $style, 'Style should include derived strong accent.');
+    assert_contains('--custom-base-font-size: 17px', $style, 'Style should include base font size.');
+    assert_contains('monospace', $style, 'Style should include safe font stack.');
 });
 
 test('event id validation accepts only positive integers', function (): void {

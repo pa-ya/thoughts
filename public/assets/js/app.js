@@ -546,6 +546,47 @@ document.addEventListener('submit', (event) => {
     }
 });
 
+document.addEventListener('input', (event) => {
+    const target = event.target;
+
+    if (!(target instanceof HTMLInputElement)) {
+        return;
+    }
+
+    const rangeTargetId = target.getAttribute('data-range-control');
+
+    if (rangeTargetId) {
+        const rangeTarget = document.getElementById(rangeTargetId);
+
+        if (rangeTarget instanceof HTMLInputElement) {
+            rangeTarget.value = target.value;
+        }
+
+        return;
+    }
+
+    const rangeSourceName = target.getAttribute('data-range-value');
+
+    if (rangeSourceName) {
+        const rangeSource = document.querySelector(`[name="${rangeSourceName}"]`);
+
+        if (rangeSource instanceof HTMLInputElement) {
+            rangeSource.value = target.value;
+        }
+
+        return;
+    }
+
+    if (target.type === 'color') {
+        const form = target.closest('form');
+        const colorText = form?.querySelector('[data-color-text]');
+
+        if (colorText instanceof HTMLInputElement) {
+            colorText.value = target.value;
+        }
+    }
+});
+
 document.querySelectorAll('[data-modal]:not([hidden])').forEach((modal) => {
     if (modal instanceof HTMLElement) {
         document.body.classList.add('modal-open');

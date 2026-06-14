@@ -7,7 +7,7 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phases 1 through 10 are implemented. The development plan is tracked in `TASKS.md`.
+Phases 1 through 11 are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
 
@@ -25,10 +25,11 @@ Implemented:
 - Admin event editing and deleting.
 - Responsive interface for mobile, tablet, and desktop.
 - Polished dashboard, modal, form, and accordion styling with restrained animations.
+- Admin-controlled theme, accent color, font size, font family, and density settings.
 
 Planned:
 
-- Customization for theme, colors, font size, font family, and density.
+- Security hardening and deployment documentation.
 
 ## Event Fields
 
@@ -77,6 +78,7 @@ Month
 │   ├── event_comments.php
 │   ├── create_event.php
 │   ├── update_event.php
+│   ├── update_settings.php
 │   ├── logout.php
 │   └── assets/
 │       ├── css/
@@ -94,7 +96,8 @@ Month
     │   ├── comments.php
     │   ├── config.php
     │   ├── database.php
-    │   └── events.php
+    │   ├── events.php
+    │   └── settings.php
     └── tests/
         └── run.php
 ```
@@ -129,7 +132,7 @@ Stores viewer comments on events.
 
 ### `settings`
 
-Stores future admin customization settings.
+Stores admin customization settings.
 
 - `setting_key`
 - `setting_value`
@@ -144,7 +147,7 @@ Admin can:
 - Delete events.
 - View comments.
 - Mark comments as read by opening an event.
-- Change visual customization settings in a later phase.
+- Change visual customization settings.
 
 Viewer can:
 
@@ -188,6 +191,7 @@ Planned interface elements:
 - Event rows with feeling rate and comment indicators.
 - Detail modal for viewing event data.
 - Admin edit/delete controls.
+- Admin settings modal for appearance customization.
 - Viewer comment input.
 - Responsive modal layout that works on narrow screens.
 - Smooth accordion and modal transitions.
@@ -196,7 +200,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 10 is complete. Phase 11, customization settings, is next.
+Current status: Phase 11 is complete. Phase 12, security hardening, is next.
 
 ## Tests
 
@@ -206,7 +210,7 @@ Run the current PHP test suite from the project root:
 php thoughts-api/tests/run.php
 ```
 
-The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event id validation, event validation, comment validation, comment review payloads, timeline grouping, event detail payloads, feeling-rate formatting, and schema smoke checks.
+The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event id validation, event validation, comment validation, comment review payloads, timeline grouping, event detail payloads, feeling-rate formatting, visual settings validation, and schema smoke checks.
 
 Recommended order:
 
