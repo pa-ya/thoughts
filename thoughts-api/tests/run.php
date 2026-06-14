@@ -124,6 +124,57 @@ test('csrf token is stable and verifiable inside a session', function (): void {
     assert_true(!verify_csrf_token(null), 'Missing CSRF token should fail.');
 });
 
+test('login throttle limits repeated failed attempts and can be cleared', function (): void {
+    start_app_session();
+    $_SESSION = [];
+
+    $limits = login_throttle_limits();
+    $now = 1000;
+
+    assert_true(!login_throttle_is_limited($now), 'Fresh sessions should not be login-limited.');
+
+    for ($attempt = 1; $attempt < $limits['max_attempts']; $attempt++) {
+        login_throttle_register_failure($now + $attempt);
+        assert_true(!login_throttle_is_limited($now + $attempt), 'Throttle should wait until the max attempt is reached.');
+    }
+
+    login_throttle_register_failure($now + $limits['max_attempts']);
+
+    assert_true(login_throttle_is_limited($now + $limits['max_attempts']), 'Throttle should lock after the configured max attempts.');
+    assert_same(
+        $limits['lockout_seconds'],
+        login_throttle_remaining_seconds($now + $limits['max_attempts']),
+        'Remaining lockout time should match the configured lockout seconds.'
+    );
+
+    login_throttle_clear();
+
+    assert_true(!login_throttle_is_limited($now + $limits['max_attempts']), 'Clearing throttle should remove the lock.');
+});
+
+test('login throttle resets after the failed-attempt window expires', function (): void {
+    start_app_session();
+    $_SESSION = [];
+
+    $limits = login_throttle_limits();
+    $now = 2000;
+
+    for ($attempt = 0; $attempt < $limits['max_attempts']; $attempt++) {
+        login_throttle_register_failure($now + $attempt);
+    }
+
+    assert_true(login_throttle_is_limited($now + $limits['max_attempts']), 'Throttle should be active before the window expires.');
+
+    $afterWindow = $now + $limits['window_seconds'] + $limits['lockout_seconds'] + 1;
+
+    assert_true(!login_throttle_is_limited($afterWindow), 'Throttle should reset after the failed-attempt window expires.');
+    assert_same(
+        ['failed_count' => 0, 'first_failed_at' => 0, 'locked_until' => 0],
+        login_throttle_state($afterWindow),
+        'Expired throttle state should normalize to an empty state.'
+    );
+});
+
 test('domain constants match field requirements', function (): void {
     assert_same(1024, event_field_max_length(), 'Event text fields should allow 1024 characters.');
     assert_same(['min' => 0.0, 'max' => 10.0], feeling_rate_bounds(), 'Feeling rate bounds should be 0 to 10.');

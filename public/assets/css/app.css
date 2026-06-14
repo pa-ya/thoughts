@@ -216,6 +216,14 @@ h3 {
     justify-content: flex-end;
 }
 
+.logout-form {
+    margin: 0;
+}
+
+.logout-form .button {
+    margin-top: 0;
+}
+
 .role-pill {
     display: inline-flex;
     align-items: center;
@@ -1125,6 +1133,10 @@ h2 {
     .header-actions {
         display: grid;
         grid-template-columns: 1fr;
+    }
+
+    .logout-form {
+        width: 100%;
     }
 
     .header-actions .button,

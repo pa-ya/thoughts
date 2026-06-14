@@ -2,7 +2,7 @@
 
 This project will be built as a pure PHP, HTML, CSS, and JavaScript application backed by MySQL. The plan below separates the work into phases so each phase produces a working, testable section of the app.
 
-Current status: Phase 11 is complete. Phase 12 is next.
+Current status: Phase 12 is complete. Phase 13 is next.
 
 ## Phase 1: Project Foundation
 
@@ -301,6 +301,8 @@ Acceptance criteria:
 - UI remains readable under all provided customization options.
 
 ## Phase 12: Security Hardening
+
+Status: Complete.
 
 Goal: Review and strengthen security before considering the project complete.
 

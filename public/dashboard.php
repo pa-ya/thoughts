@@ -140,7 +140,10 @@ function event_detail_json(array $event): string
                     </button>
                 <?php endif; ?>
                 <span class="role-pill"><?= e(ucfirst($currentRole)) ?></span>
-                <a class="button button-secondary" href="logout.php">Logout</a>
+                <form class="logout-form" method="post" action="logout.php">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                    <button class="button button-secondary" type="submit">Logout</button>
+                </form>
             </div>
         </header>
 

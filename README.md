@@ -7,7 +7,7 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phases 1 through 11 are implemented. The development plan is tracked in `TASKS.md`.
+Phases 1 through 12 are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
 
@@ -26,10 +26,11 @@ Implemented:
 - Responsive interface for mobile, tablet, and desktop.
 - Polished dashboard, modal, form, and accordion styling with restrained animations.
 - Admin-controlled theme, accent color, font size, font family, and density settings.
+- CSRF-protected mutation routes, safer session cookies, and session-based login throttling.
 
 Planned:
 
-- Security hardening and deployment documentation.
+- Manual QA and deployment documentation.
 
 ## Event Fields
 
@@ -163,19 +164,19 @@ Viewer cannot:
 - Read admin-only settings pages.
 - Mark comments as read.
 
-## Security Plan
+## Security Approach
 
-The implementation should follow these rules:
+The implementation follows these rules:
 
 - Store password hashes in local config, not plaintext passwords.
 - Keep local config out of version control.
 - Use PDO prepared statements for all database queries.
 - Escape rendered user content with `htmlspecialchars`.
 - Validate all user input on the server.
-- Use CSRF tokens for create, update, delete, comment, and settings forms.
+- Use CSRF tokens for login, logout, create, update, delete, comment, comment review, and settings forms.
 - Check the user role on every protected action.
-- Use secure session cookie settings.
-- Add simple login throttling to slow repeated failed attempts.
+- Use HttpOnly, SameSite=Lax, strict-mode session cookies, and secure cookies when HTTPS is active.
+- Use simple session-based login throttling to slow repeated failed attempts.
 
 ## UI Direction
 
@@ -200,7 +201,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 11 is complete. Phase 12, security hardening, is next.
+Current status: Phase 12 is complete. Phase 13, testing and manual QA, is next.
 
 ## Tests
 
@@ -210,7 +211,7 @@ Run the current PHP test suite from the project root:
 php thoughts-api/tests/run.php
 ```
 
-The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event id validation, event validation, comment validation, comment review payloads, timeline grouping, event detail payloads, feeling-rate formatting, visual settings validation, and schema smoke checks.
+The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, login throttling, domain constants, event id validation, event validation, comment validation, comment review payloads, timeline grouping, event detail payloads, feeling-rate formatting, visual settings validation, and schema smoke checks.
 
 Recommended order:
 
@@ -224,7 +225,8 @@ Recommended order:
 8. Add admin edit/delete.
 9. Polish responsive UI and animations.
 10. Add customization settings.
-11. Harden security and document deployment.
+11. Harden security.
+12. Run manual QA and document deployment.
 
 ## Future Local Setup
 
