@@ -7,7 +7,7 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phases 1 through 6 are implemented. The development plan is tracked in `TASKS.md`.
+Phases 1 through 7 are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
 
@@ -19,12 +19,13 @@ Implemented:
 - Admin-only event creation modal.
 - Clickable event rows that open a detail modal.
 - Role-specific detail modal controls for admin and viewer.
+- Viewer comment submission for each event.
+- Admin unread comment indicators.
 - Responsive baseline interface for mobile, tablet, and desktop.
 
 Planned:
 
-- Viewer comment submission for each event.
-- Admin comment review with unread indicators and read tracking.
+- Admin comment review with read tracking.
 - Admin event editing and deleting.
 - Customization for theme, colors, font size, font family, and density.
 
@@ -70,6 +71,7 @@ Month
 ├── public/
 │   ├── index.php
 │   ├── dashboard.php
+│   ├── create_comment.php
 │   ├── create_event.php
 │   ├── logout.php
 │   └── assets/
@@ -190,7 +192,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 6 is complete. Phase 7, viewer comments, is next.
+Current status: Phase 7 is complete. Phase 8, admin comment review, is next.
 
 ## Tests
 
@@ -200,7 +202,7 @@ Run the current PHP test suite from the project root:
 php thoughts-api/tests/run.php
 ```
 
-The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event validation, timeline grouping, event detail payloads, feeling-rate formatting, and schema smoke checks.
+The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event validation, comment validation, timeline grouping, event detail payloads, feeling-rate formatting, and schema smoke checks.
 
 Recommended order:
 
@@ -232,4 +234,3 @@ php -S localhost:8000 -t public
 ```
 
 The exact instructions will be finalized during the implementation phases.
-

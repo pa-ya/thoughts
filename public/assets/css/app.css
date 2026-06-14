@@ -493,6 +493,12 @@ h3 {
     color: var(--success);
 }
 
+.flash-error {
+    border-color: rgba(185, 28, 28, 0.28);
+    background: rgba(185, 28, 28, 0.08);
+    color: var(--danger);
+}
+
 .modal-backdrop {
     position: fixed;
     inset: 0;

@@ -71,6 +71,12 @@ const fillEventDetailModal = (modal, detail) => {
     if (eventId instanceof HTMLInputElement) {
         eventId.value = detailValue(detail.id);
     }
+
+    const commentText = modal.querySelector('textarea[name="comment_text"]');
+
+    if (commentText instanceof HTMLTextAreaElement) {
+        commentText.value = '';
+    }
 };
 
 const openEventDetail = (trigger) => {

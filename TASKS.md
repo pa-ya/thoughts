@@ -2,7 +2,7 @@
 
 This project will be built as a pure PHP, HTML, CSS, and JavaScript application backed by MySQL. The plan below separates the work into phases so each phase produces a working, testable section of the app.
 
-Current status: Phase 6 is complete. Phase 7 is next.
+Current status: Phase 7 is complete. Phase 8 is next.
 
 ## Phase 1: Project Foundation
 
@@ -182,6 +182,8 @@ Acceptance criteria:
 
 ## Phase 7: Viewer Comments
 
+Status: Complete.
+
 Goal: Let viewer users add comments to a specific event.
 
 - Add a comment form in the event detail modal for viewer users.
@@ -360,4 +362,3 @@ Acceptance criteria:
 - A new developer or server admin can install the app from the README.
 - Required secrets are documented without being committed.
 - Production notes are clear enough for a basic shared-hosting deployment.
-

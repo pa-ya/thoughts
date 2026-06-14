@@ -390,14 +390,15 @@ function event_detail_json(array $event): string
                     <button class="button button-danger" type="button" disabled>Delete</button>
                 </div>
             <?php else: ?>
-                <form class="event-form comment-form" method="post" action="#">
+                <form class="event-form comment-form" method="post" action="create_comment.php" novalidate>
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                     <input type="hidden" name="event_id" value="">
                     <div class="form-field">
                         <label for="detail-comment">Comment</label>
-                        <textarea id="detail-comment" name="comment_text" maxlength="<?= COMMENT_TEXT_MAX_LENGTH ?>" rows="4" disabled></textarea>
+                        <textarea id="detail-comment" name="comment_text" maxlength="<?= COMMENT_TEXT_MAX_LENGTH ?>" rows="4" required></textarea>
                     </div>
                     <div class="modal-actions detail-actions">
-                        <button class="button" type="submit" disabled>Send Comment</button>
+                        <button class="button" type="submit">Send Comment</button>
                     </div>
                 </form>
             <?php endif; ?>

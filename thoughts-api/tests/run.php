@@ -129,6 +129,34 @@ test('domain constants match field requirements', function (): void {
     assert_same(1024, comment_field_max_length(), 'Comment field should allow 1024 characters.');
 });
 
+test('comment validation accepts valid input and normalizes data', function (): void {
+    $result = validate_comment_input([
+        'event_id' => '12',
+        'comment_text' => '  A useful comment  ',
+    ]);
+
+    assert_same([], $result['errors'], 'Valid comment input should have no errors.');
+    assert_same(12, $result['data']['event_id'], 'Event id should be normalized to an integer.');
+    assert_same('A useful comment', $result['data']['comment_text'], 'Comment text should be trimmed.');
+});
+
+test('comment validation rejects invalid input', function (): void {
+    $result = validate_comment_input([
+        'event_id' => '0',
+        'comment_text' => '',
+    ]);
+
+    assert_true(isset($result['errors']['event_id']), 'Invalid event id should be rejected.');
+    assert_true(isset($result['errors']['comment_text']), 'Empty comment should be rejected.');
+
+    $longResult = validate_comment_input([
+        'event_id' => '1',
+        'comment_text' => str_repeat('a', 1025),
+    ]);
+
+    assert_true(isset($longResult['errors']['comment_text']), 'Overlong comments should be rejected.');
+});
+
 test('event validation accepts valid input and normalizes data', function (): void {
     $result = validate_event_input([
         'event_date' => '2026-06-12',
