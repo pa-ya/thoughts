@@ -218,13 +218,13 @@ function event_detail_json(array $event): string
 
                                                     <div class="event-badges" aria-label="Event status">
                                                         <?php if ((int) $event['comment_count'] > 0): ?>
-                                                            <span class="comment-badge">
+                                                            <span class="comment-badge" data-comment-count-badge>
                                                                 <?= e(pluralize_count((int) $event['comment_count'], 'comment', 'comments')) ?>
                                                             </span>
                                                         <?php endif; ?>
 
                                                         <?php if ($currentRole === ROLE_ADMIN && (int) $event['unread_comment_count'] > 0): ?>
-                                                            <span class="comment-badge comment-badge-new">
+                                                            <span class="comment-badge comment-badge-new" data-unread-comment-badge>
                                                                 <?= e(pluralize_count((int) $event['unread_comment_count'], 'new', 'new')) ?>
                                                             </span>
                                                         <?php endif; ?>
@@ -342,6 +342,10 @@ function event_detail_json(array $event): string
         aria-hidden="true"
         data-modal
         data-event-detail-modal
+        <?php if ($currentRole === ROLE_ADMIN): ?>
+            data-comments-url="event_comments.php"
+            data-comments-csrf="<?= e(csrf_token()) ?>"
+        <?php endif; ?>
         hidden
     >
         <section class="modal-panel modal-panel-wide" data-modal-panel>
@@ -382,7 +386,9 @@ function event_detail_json(array $event): string
             <?php if ($currentRole === ROLE_ADMIN): ?>
                 <section class="detail-section detail-comments">
                     <h3>Comments</h3>
-                    <p class="detail-text" data-detail-field="adminCommentsPreview"></p>
+                    <div class="comments-list" data-admin-comments-list aria-live="polite">
+                        <p class="detail-text" data-detail-field="adminCommentsPreview"></p>
+                    </div>
                 </section>
 
                 <div class="modal-actions detail-actions">

@@ -157,6 +157,36 @@ test('comment validation rejects invalid input', function (): void {
     assert_true(isset($longResult['errors']['comment_text']), 'Overlong comments should be rejected.');
 });
 
+test('comment payload helpers expose admin review values', function (): void {
+    $comment = normalize_comment([
+        'id' => '9',
+        'event_id' => '3',
+        'comment_text' => "Viewer note\nwith detail",
+        'is_read_by_admin' => '0',
+        'created_at' => '2026-06-14 09:30:00',
+        'read_at' => null,
+    ]);
+
+    assert_same(9, $comment['id'], 'Comment id should normalize to int.');
+    assert_same(3, $comment['event_id'], 'Event id should normalize to int.');
+    assert_same(false, $comment['is_read_by_admin'], 'Unread flag should normalize to false.');
+    assert_null($comment['read_at'], 'Unread comments should preserve null read time.');
+
+    $payload = comment_detail_payload($comment);
+
+    assert_same(9, $payload['id'], 'Payload should include comment id.');
+    assert_same(3, $payload['eventId'], 'Payload should include event id.');
+    assert_same("Viewer note\nwith detail", $payload['text'], 'Payload should preserve comment text.');
+    assert_same(false, $payload['isReadByAdmin'], 'Payload should include read state.');
+    assert_same(true, $payload['isUnread'], 'Payload should expose unread state for highlighting.');
+
+    assert_same(
+        ['commentCount' => 2, 'unreadCommentCount' => 0],
+        comment_stats_payload(['comment_count' => '2', 'unread_comment_count' => '0']),
+        'Stats payload should use camel-case integer counts.'
+    );
+});
+
 test('event validation accepts valid input and normalizes data', function (): void {
     $result = validate_event_input([
         'event_date' => '2026-06-12',

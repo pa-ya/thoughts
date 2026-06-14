@@ -18,12 +18,14 @@ const closeModal = (modal) => {
     document.body.classList.remove('modal-open');
 };
 
+const pluralizeCount = (count, singular, plural) => `${count} ${count === 1 ? singular : plural}`;
+
 const commentSummary = (commentCount, unreadCommentCount) => {
     if (commentCount === 0) {
         return 'No comments yet.';
     }
 
-    const comments = `${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}`;
+    const comments = pluralizeCount(commentCount, 'comment', 'comments');
 
     if (unreadCommentCount === 0) {
         return comments;
@@ -44,9 +46,168 @@ const detailValue = (value) => {
     return '';
 };
 
+const renderAdminCommentsMessage = (modal, message, type = '') => {
+    const list = modal.querySelector('[data-admin-comments-list]');
+
+    if (!(list instanceof HTMLElement)) {
+        return;
+    }
+
+    const paragraph = document.createElement('p');
+    paragraph.className = `detail-text comment-message${type ? ` comment-message-${type}` : ''}`;
+    paragraph.textContent = message;
+    list.replaceChildren(paragraph);
+};
+
+const renderAdminComments = (modal, comments) => {
+    const list = modal.querySelector('[data-admin-comments-list]');
+
+    if (!(list instanceof HTMLElement)) {
+        return;
+    }
+
+    if (!Array.isArray(comments) || comments.length === 0) {
+        renderAdminCommentsMessage(modal, 'No comments yet.');
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    comments.forEach((comment) => {
+        const item = document.createElement('article');
+        item.className = 'comment-item';
+
+        if (comment?.isUnread === true) {
+            item.classList.add('comment-item-new');
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'comment-meta';
+
+        const time = document.createElement('time');
+        time.textContent = detailValue(comment?.createdAt);
+        meta.appendChild(time);
+
+        const status = document.createElement('span');
+        status.className = 'comment-status';
+        status.textContent = comment?.isUnread === true ? 'New' : 'Read';
+        meta.appendChild(status);
+
+        const text = document.createElement('p');
+        text.className = 'comment-text';
+        text.textContent = detailValue(comment?.text);
+
+        item.append(meta, text);
+        fragment.appendChild(item);
+    });
+
+    list.replaceChildren(fragment);
+};
+
+const setDetailCommentSummary = (modal, commentCount, unreadCommentCount) => {
+    const field = modal.querySelector('[data-detail-field="commentSummary"]');
+
+    if (field instanceof HTMLElement) {
+        field.textContent = commentSummary(commentCount, unreadCommentCount);
+    }
+};
+
+const updateEventTriggerCommentState = (trigger, detail, stats) => {
+    const commentCount = Number.parseInt(stats?.commentCount, 10) || 0;
+    const unreadCommentCount = Number.parseInt(stats?.unreadCommentCount, 10) || 0;
+
+    detail.commentCount = commentCount;
+    detail.unreadCommentCount = unreadCommentCount;
+    trigger.setAttribute('data-event-detail', JSON.stringify(detail));
+
+    const badges = trigger.querySelector('.event-badges');
+
+    if (!(badges instanceof HTMLElement)) {
+        return;
+    }
+
+    const countBadge = badges.querySelector('[data-comment-count-badge]');
+
+    if (commentCount > 0) {
+        if (countBadge instanceof HTMLElement) {
+            countBadge.textContent = pluralizeCount(commentCount, 'comment', 'comments');
+        } else {
+            const badge = document.createElement('span');
+            badge.className = 'comment-badge';
+            badge.setAttribute('data-comment-count-badge', '');
+            badge.textContent = pluralizeCount(commentCount, 'comment', 'comments');
+            badges.prepend(badge);
+        }
+    } else if (countBadge instanceof HTMLElement) {
+        countBadge.remove();
+    }
+
+    const unreadBadge = badges.querySelector('[data-unread-comment-badge]');
+
+    if (unreadCommentCount > 0) {
+        if (unreadBadge instanceof HTMLElement) {
+            unreadBadge.textContent = pluralizeCount(unreadCommentCount, 'new', 'new');
+        } else {
+            const badge = document.createElement('span');
+            badge.className = 'comment-badge comment-badge-new';
+            badge.setAttribute('data-unread-comment-badge', '');
+            badge.textContent = pluralizeCount(unreadCommentCount, 'new', 'new');
+            badges.appendChild(badge);
+        }
+    } else if (unreadBadge instanceof HTMLElement) {
+        unreadBadge.remove();
+    }
+};
+
+const loadAdminComments = async (modal, trigger, detail) => {
+    const url = modal.getAttribute('data-comments-url');
+    const csrfToken = modal.getAttribute('data-comments-csrf');
+
+    if (!url || !csrfToken) {
+        return;
+    }
+
+    renderAdminCommentsMessage(modal, 'Loading comments...');
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                csrf_token: csrfToken,
+                event_id: detailValue(detail.id),
+            }),
+        });
+
+        const payload = await response.json();
+
+        if (!response.ok) {
+            throw new Error(detailValue(payload?.error) || 'Comments could not be loaded.');
+        }
+
+        if (modal.dataset.activeEventId !== detailValue(detail.id)) {
+            return;
+        }
+
+        renderAdminComments(modal, payload.comments);
+
+        const commentCount = Number.parseInt(payload?.stats?.commentCount, 10) || 0;
+        const unreadCommentCount = Number.parseInt(payload?.stats?.unreadCommentCount, 10) || 0;
+        setDetailCommentSummary(modal, commentCount, unreadCommentCount);
+        updateEventTriggerCommentState(trigger, detail, payload.stats);
+    } catch (error) {
+        console.error('Could not load event comments.', error);
+        renderAdminCommentsMessage(modal, 'Comments could not be loaded.', 'error');
+    }
+};
+
 const fillEventDetailModal = (modal, detail) => {
     const count = Number.parseInt(detail.commentCount, 10) || 0;
     const unread = Number.parseInt(detail.unreadCommentCount, 10) || 0;
+    modal.dataset.activeEventId = detailValue(detail.id);
     const values = {
         eventText: detailValue(detail.eventText),
         eventDateLabel: detailValue(detail.eventDateLabel || detail.eventDate),
@@ -93,8 +254,10 @@ const openEventDetail = (trigger) => {
     }
 
     try {
-        fillEventDetailModal(modal, JSON.parse(rawDetail));
+        const detail = JSON.parse(rawDetail);
+        fillEventDetailModal(modal, detail);
         openModal(modal);
+        loadAdminComments(modal, trigger, detail);
     } catch (error) {
         console.error('Could not open event detail modal.', error);
     }

@@ -2,7 +2,7 @@
 
 This project will be built as a pure PHP, HTML, CSS, and JavaScript application backed by MySQL. The plan below separates the work into phases so each phase produces a working, testable section of the app.
 
-Current status: Phase 7 is complete. Phase 8 is next.
+Current status: Phase 8 is complete. Phase 9 is next.
 
 ## Phase 1: Project Foundation
 
@@ -202,6 +202,8 @@ Acceptance criteria:
 - Admin dashboard shows unread comment indicators.
 
 ## Phase 8: Admin Comment Review
+
+Status: Complete.
 
 Goal: Let admin view comments and automatically mark them as read.
 

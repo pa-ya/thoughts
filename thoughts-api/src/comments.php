@@ -72,3 +72,82 @@ function create_comment(array $data): int
 
     return (int) db()->lastInsertId();
 }
+
+function normalize_comment(array $comment): array
+{
+    return [
+        'id' => (int) $comment['id'],
+        'event_id' => (int) $comment['event_id'],
+        'comment_text' => (string) $comment['comment_text'],
+        'is_read_by_admin' => (bool) $comment['is_read_by_admin'],
+        'created_at' => (string) $comment['created_at'],
+        'read_at' => $comment['read_at'] === null ? null : (string) $comment['read_at'],
+    ];
+}
+
+function fetch_comments_for_event(int $eventId): array
+{
+    $statement = db()->prepare(
+        'SELECT id, event_id, comment_text, is_read_by_admin, created_at, read_at
+        FROM comments
+        WHERE event_id = :event_id
+        ORDER BY created_at ASC, id ASC'
+    );
+
+    $statement->execute(['event_id' => $eventId]);
+
+    return array_map('normalize_comment', $statement->fetchAll());
+}
+
+function mark_event_comments_read(int $eventId): int
+{
+    $statement = db()->prepare(
+        'UPDATE comments
+        SET is_read_by_admin = 1, read_at = COALESCE(read_at, CURRENT_TIMESTAMP)
+        WHERE event_id = :event_id AND is_read_by_admin = 0'
+    );
+
+    $statement->execute(['event_id' => $eventId]);
+
+    return $statement->rowCount();
+}
+
+function comment_stats_for_event(int $eventId): array
+{
+    $statement = db()->prepare(
+        'SELECT
+            COUNT(*) AS comment_count,
+            SUM(CASE WHEN is_read_by_admin = 0 THEN 1 ELSE 0 END) AS unread_comment_count
+        FROM comments
+        WHERE event_id = :event_id'
+    );
+
+    $statement->execute(['event_id' => $eventId]);
+    $stats = $statement->fetch();
+
+    return [
+        'comment_count' => (int) ($stats['comment_count'] ?? 0),
+        'unread_comment_count' => (int) ($stats['unread_comment_count'] ?? 0),
+    ];
+}
+
+function comment_detail_payload(array $comment): array
+{
+    return [
+        'id' => (int) $comment['id'],
+        'eventId' => (int) $comment['event_id'],
+        'text' => (string) $comment['comment_text'],
+        'createdAt' => (string) $comment['created_at'],
+        'readAt' => $comment['read_at'] === null ? null : (string) $comment['read_at'],
+        'isReadByAdmin' => (bool) $comment['is_read_by_admin'],
+        'isUnread' => !(bool) $comment['is_read_by_admin'],
+    ];
+}
+
+function comment_stats_payload(array $stats): array
+{
+    return [
+        'commentCount' => (int) $stats['comment_count'],
+        'unreadCommentCount' => (int) $stats['unread_comment_count'],
+    ];
+}
