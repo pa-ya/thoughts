@@ -1,6 +1,6 @@
 -- Thoughts Timeline database schema
--- Target: MySQL 8.0+ with InnoDB, utf8mb4, and utf8mb4_0900_ai_ci.
-SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+-- Target: MySQL 5.7+/8.0 or MariaDB 10.2+ with InnoDB, utf8mb4, and utf8mb4_unicode_ci.
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS events (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS events (
     CONSTRAINT chk_events_thoughts_length CHECK (CHAR_LENGTH(thoughts) <= 1024),
     CONSTRAINT chk_events_physical_effect_length CHECK (CHAR_LENGTH(physical_effect) <= 1024),
     CONSTRAINT chk_events_feeling_rate CHECK (feeling_rate >= 0 AND feeling_rate <= 10)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS comments (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -39,14 +39,14 @@ CREATE TABLE IF NOT EXISTS comments (
         (is_read_by_admin = 0 AND read_at IS NULL)
         OR (is_read_by_admin = 1)
     )
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS settings (
     setting_key VARCHAR(100) NOT NULL,
     setting_value TEXT NOT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (setting_key)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO settings (setting_key, setting_value)
 VALUES

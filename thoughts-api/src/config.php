@@ -68,7 +68,7 @@ function app_config(): array
             'user' => getenv('DB_USER') ?: 'thoughts_user',
             'password' => getenv('DB_PASSWORD') ?: '',
             'charset' => getenv('DB_CHARSET') ?: 'utf8mb4',
-            'collation' => getenv('DB_COLLATION') ?: 'utf8mb4_0900_ai_ci',
+            'collation' => getenv('DB_COLLATION') ?: 'utf8mb4_unicode_ci',
         ],
         'auth' => [
             'admin_password_hash' => getenv('ADMIN_PASSWORD_HASH') ?: '',

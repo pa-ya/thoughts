@@ -16,7 +16,7 @@ return [
         'user' => 'thoughts_user',
         'password' => 'change-me',
         'charset' => 'utf8mb4',
-        'collation' => 'utf8mb4_0900_ai_ci',
+        'collation' => 'utf8mb4_unicode_ci',
     ],
 
     'auth' => [
