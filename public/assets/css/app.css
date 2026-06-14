@@ -2036,3 +2036,199 @@ h1 {
     .timeline-month:nth-child(6) { animation-delay: 380ms; }
     .timeline-month:nth-child(n + 7) { animation-delay: 440ms; }
 }
+
+/* =====================================================================
+   Phase 16: Table View
+   A switch flips the dashboard between the accordion timeline and a flat
+   table. Both are rendered server-side; visibility is class-driven so the
+   choice survives reloads without a server round-trip.
+   ===================================================================== */
+
+/* View toggling. The table is hidden by default and revealed when the
+   <html> element carries .show-table-view (set by the saved preference). */
+[data-table-view] {
+    display: none;
+}
+
+.show-table-view [data-timeline-view] {
+    display: none;
+}
+
+.show-table-view [data-table-view] {
+    display: block;
+}
+
+.view-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+/* iOS-style accent switch */
+.view-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    cursor: pointer;
+    font-weight: 700;
+    user-select: none;
+}
+
+.view-switch-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.view-switch-track {
+    position: relative;
+    flex: none;
+    width: 46px;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--muted) 26%, var(--surface));
+    transition: background 200ms var(--ease-out), border-color 200ms var(--ease-out);
+}
+
+.view-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+    transition: transform 220ms var(--ease-out);
+}
+
+.view-switch-input:checked + .view-switch-track {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.view-switch-input:checked + .view-switch-track .view-switch-thumb {
+    transform: translateX(20px);
+}
+
+.view-switch-input:focus-visible + .view-switch-track {
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
+}
+
+.view-switch:hover .view-switch-track {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.view-switch-text {
+    color: var(--text);
+}
+
+/* Table shell: horizontal scroll on narrow screens so the layout never
+   crushes; the table keeps a comfortable min-width and grows in height. */
+.table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+    -webkit-overflow-scrolling: touch;
+}
+
+.events-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.95rem;
+}
+
+/* Date and Rate stay tight; the three text columns split the rest evenly. */
+.events-table col.col-date {
+    width: 128px;
+}
+
+.events-table col.col-rate {
+    width: 96px;
+}
+
+.events-table th,
+.events-table td {
+    padding: 13px 15px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--border);
+}
+
+.events-table thead th {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    color: var(--text);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 2px solid color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+.events-table th.col-rate,
+.events-table td.col-rate {
+    text-align: center;
+    padding-inline: 10px;
+}
+
+.events-table tbody tr {
+    cursor: pointer;
+    transition: background 150ms var(--ease-out);
+}
+
+.events-table tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--surface-muted) 55%, var(--surface));
+}
+
+.events-table tbody tr:hover {
+    background: var(--hover-tint);
+}
+
+.events-table tbody tr:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: -3px;
+}
+
+.events-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* Text cells: preserve line breaks, wrap long words, isolate RTL values
+   so they read correctly inside the LTR table. Height grows with content. */
+.cell-text {
+    display: block;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    unicode-bidi: isolate;
+}
+
+.cell-date-day {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.cell-date-main {
+    display: block;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .view-toolbar {
+        justify-content: flex-start;
+    }
+}

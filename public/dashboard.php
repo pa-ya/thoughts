@@ -12,6 +12,7 @@ start_app_session();
 $appName = (string) config_get('app.name', 'Thoughts Timeline');
 $currentRole = require_authenticated_user();
 $databaseStatus = database_health_check();
+$timelineEvents = [];
 $timelineGroups = [];
 $timelineError = null;
 $visualSettings = default_visual_settings();
@@ -41,7 +42,8 @@ if ($databaseStatus['ok']) {
     }
 
     try {
-        $timelineGroups = group_events_by_month_day(fetch_timeline_events());
+        $timelineEvents = fetch_timeline_events();
+        $timelineGroups = group_events_by_month_day($timelineEvents);
     } catch (Throwable $exception) {
         error_log('Timeline query failed: ' . $exception->getMessage());
         $timelineError = 'Timeline data is not available. Make sure the database schema has been imported.';
@@ -82,6 +84,17 @@ function event_preview(string $text): string
 function old_event_value(array $old, string $field, string $default = ''): string
 {
     return (string) ($old[$field] ?? $default);
+}
+
+function table_event_date(string $date): array
+{
+    $parsed = new DateTimeImmutable($date);
+
+    return [
+        'weekday' => $parsed->format('D'),
+        'label' => $parsed->format('M j, Y'),
+        'full' => $parsed->format('F j, Y'),
+    ];
 }
 
 function feeling_tier(float $rate): string
@@ -129,6 +142,18 @@ function event_detail_json(array $event): string
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard | <?= e($appName) ?></title>
     <link rel="stylesheet" href="assets/css/app.css">
+    <script>
+        // Apply the saved Table View preference before first paint to avoid a flash.
+        (function () {
+            try {
+                if (localStorage.getItem('thoughts:tableView') === '1') {
+                    document.documentElement.classList.add('show-table-view');
+                }
+            } catch (error) {
+                /* localStorage may be unavailable; fall back to timeline view. */
+            }
+        })();
+    </script>
     <script src="assets/js/app.js" defer></script>
 </head>
 <body
@@ -198,7 +223,15 @@ function event_detail_json(array $event): string
                 <p class="notice">Once events are added, they will appear here grouped by month and day.</p>
             </section>
         <?php else: ?>
-            <section class="timeline" aria-label="Events grouped by month and day">
+            <div class="view-toolbar">
+                <label class="view-switch">
+                    <input type="checkbox" class="view-switch-input" data-table-view-toggle>
+                    <span class="view-switch-track" aria-hidden="true"><span class="view-switch-thumb"></span></span>
+                    <span class="view-switch-text">Table View</span>
+                </label>
+            </div>
+
+            <section class="timeline" aria-label="Events grouped by month and day" data-timeline-view>
                 <?php foreach ($timelineGroups as $monthIndex => $month): ?>
                     <?php $monthPanelId = 'month-panel-' . $monthIndex; ?>
                     <section class="accordion-item timeline-month">
@@ -312,6 +345,72 @@ function event_detail_json(array $event): string
                         </div>
                     </section>
                 <?php endforeach; ?>
+            </section>
+
+            <?php
+            // Flat list for the table view, sorted strictly by date then id (descending).
+            $tableEvents = $timelineEvents;
+            usort($tableEvents, static function (array $a, array $b): int {
+                return [$b['event_date'], $b['id']] <=> [$a['event_date'], $a['id']];
+            });
+            ?>
+            <section class="timeline-table-view" aria-label="Events table" data-table-view>
+                <div class="table-scroll">
+                    <table class="events-table">
+                        <colgroup>
+                            <col class="col-date">
+                            <col class="col-text">
+                            <col class="col-text">
+                            <col class="col-text">
+                            <col class="col-rate">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="col-date">Date</th>
+                                <th scope="col">Event</th>
+                                <th scope="col">Thoughts</th>
+                                <th scope="col">Physical Effect</th>
+                                <th scope="col" class="col-rate">Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($tableEvents as $event): ?>
+                                <?php
+                                $rowDate = table_event_date((string) $event['event_date']);
+                                $rowFeeling = (float) $event['feeling_rate'];
+                                $rowPreview = event_preview((string) $event['event_text']);
+                                $detailEvent = $event;
+                                $detailEvent['event_date_label'] = $rowDate['full'];
+
+                                if ($currentRole !== ROLE_ADMIN) {
+                                    $detailEvent['unread_comment_count'] = 0;
+                                }
+                                ?>
+                                <tr
+                                    class="event-detail-trigger"
+                                    role="button"
+                                    tabindex="0"
+                                    aria-label="Open event details: <?= e($rowPreview) ?>"
+                                    data-event-detail="<?= e(event_detail_json($detailEvent)) ?>"
+                                >
+                                    <td class="col-date">
+                                        <span class="cell-date-day"><?= e($rowDate['weekday']) ?></span>
+                                        <span class="cell-date-main"><?= e($rowDate['label']) ?></span>
+                                    </td>
+                                    <td><span class="cell-text" dir="auto"><?= e((string) $event['event_text']) ?></span></td>
+                                    <td><span class="cell-text" dir="auto"><?= e((string) $event['thoughts']) ?></span></td>
+                                    <td><span class="cell-text" dir="auto"><?= e((string) $event['physical_effect']) ?></span></td>
+                                    <td class="col-rate">
+                                        <span class="feeling-chip" data-tier="<?= e(feeling_tier($rowFeeling)) ?>" title="Feeling rate">
+                                            <span class="feeling-chip-num"><?= e(format_feeling_rate($rowFeeling)) ?></span>
+                                            <span class="feeling-chip-unit">/10</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         <?php endif; ?>
     </main>

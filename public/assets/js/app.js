@@ -627,3 +627,22 @@ document.querySelectorAll('[data-modal]:not([hidden])').forEach((modal) => {
         document.body.classList.add('modal-open');
     }
 });
+
+// Table View switch: toggles the timeline/table layout and remembers the choice.
+const TABLE_VIEW_STORAGE_KEY = 'thoughts:tableView';
+const tableViewToggle = document.querySelector('[data-table-view-toggle]');
+
+if (tableViewToggle instanceof HTMLInputElement) {
+    tableViewToggle.checked = document.documentElement.classList.contains('show-table-view');
+
+    tableViewToggle.addEventListener('change', () => {
+        const enabled = tableViewToggle.checked;
+        document.documentElement.classList.toggle('show-table-view', enabled);
+
+        try {
+            window.localStorage.setItem(TABLE_VIEW_STORAGE_KEY, enabled ? '1' : '0');
+        } catch (error) {
+            /* Ignore storage failures; the toggle still works for this session. */
+        }
+    });
+}
