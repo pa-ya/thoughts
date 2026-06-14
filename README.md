@@ -7,20 +7,26 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phase 1 project foundation, Phase 2 database schema, Phase 3 login routing, Phase 4 timeline read view, and Phase 5 admin event creation are implemented. The development plan is tracked in `TASKS.md`.
+Phases 1 through 6 are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
+
+Implemented:
 
 - Password-based login with separate admin and viewer passwords.
 - Shared dashboard showing records grouped by month and day.
 - Month and day sections are collapsed by default.
 - Admin-only event creation modal.
+- Clickable event rows that open a detail modal.
+- Role-specific detail modal controls for admin and viewer.
+- Responsive baseline interface for mobile, tablet, and desktop.
+
+Planned:
+
+- Viewer comment submission for each event.
+- Admin comment review with unread indicators and read tracking.
 - Admin event editing and deleting.
-- Viewer comment modal for each event.
-- Admin unread comment indicators.
-- Comments are marked as read when admin opens the related event.
-- Responsive interface for mobile, tablet, and desktop.
-- Planned customization for theme, colors, font size, font family, and density.
+- Customization for theme, colors, font size, font family, and density.
 
 ## Event Fields
 
@@ -184,7 +190,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 5 is complete. Phase 6, event detail modal, is next.
+Current status: Phase 6 is complete. Phase 7, viewer comments, is next.
 
 ## Tests
 
@@ -194,7 +200,7 @@ Run the current PHP test suite from the project root:
 php thoughts-api/tests/run.php
 ```
 
-The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event validation, timeline grouping, feeling-rate formatting, and schema smoke checks.
+The current tests cover configuration loading, password role resolution, session role helpers, CSRF tokens, domain constants, event validation, timeline grouping, event detail payloads, feeling-rate formatting, and schema smoke checks.
 
 Recommended order:
 

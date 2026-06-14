@@ -5,7 +5,7 @@ const openModal = (modal) => {
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
 
-    const focusTarget = modal.querySelector('input, textarea, button, select, a[href]');
+    const focusTarget = modal.querySelector('input:not([disabled]), textarea:not([disabled]), button:not([disabled]), select:not([disabled]), a[href]');
 
     if (focusTarget instanceof HTMLElement) {
         focusTarget.focus();
@@ -18,8 +18,90 @@ const closeModal = (modal) => {
     document.body.classList.remove('modal-open');
 };
 
+const commentSummary = (commentCount, unreadCommentCount) => {
+    if (commentCount === 0) {
+        return 'No comments yet.';
+    }
+
+    const comments = `${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}`;
+
+    if (unreadCommentCount === 0) {
+        return comments;
+    }
+
+    return `${comments}, ${unreadCommentCount} new`;
+};
+
+const detailValue = (value) => {
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    if (typeof value === 'number') {
+        return String(value);
+    }
+
+    return '';
+};
+
+const fillEventDetailModal = (modal, detail) => {
+    const count = Number.parseInt(detail.commentCount, 10) || 0;
+    const unread = Number.parseInt(detail.unreadCommentCount, 10) || 0;
+    const values = {
+        eventText: detailValue(detail.eventText),
+        eventDateLabel: detailValue(detail.eventDateLabel || detail.eventDate),
+        feelingRate: detailValue(detail.feelingRate),
+        thoughts: detailValue(detail.thoughts),
+        physicalEffect: detailValue(detail.physicalEffect),
+        commentSummary: commentSummary(count, unread),
+        adminCommentsPreview: commentSummary(count, unread),
+    };
+
+    modal.querySelectorAll('[data-detail-field]').forEach((field) => {
+        if (!(field instanceof HTMLElement)) {
+            return;
+        }
+
+        const key = field.getAttribute('data-detail-field');
+        field.textContent = key && Object.prototype.hasOwnProperty.call(values, key) ? values[key] : '';
+    });
+
+    const eventId = modal.querySelector('input[name="event_id"]');
+
+    if (eventId instanceof HTMLInputElement) {
+        eventId.value = detailValue(detail.id);
+    }
+};
+
+const openEventDetail = (trigger) => {
+    const modal = document.getElementById('event-detail-modal');
+
+    if (!(modal instanceof HTMLElement)) {
+        return;
+    }
+
+    const rawDetail = trigger.getAttribute('data-event-detail');
+
+    if (!rawDetail) {
+        return;
+    }
+
+    try {
+        fillEventDetailModal(modal, JSON.parse(rawDetail));
+        openModal(modal);
+    } catch (error) {
+        console.error('Could not open event detail modal.', error);
+    }
+};
+
 document.addEventListener('click', (event) => {
-    const toggle = event.target.closest('[data-accordion-toggle]');
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+        return;
+    }
+
+    const toggle = target.closest('[data-accordion-toggle]');
 
     if (toggle instanceof HTMLButtonElement) {
         const panelId = toggle.getAttribute('aria-controls');
@@ -41,45 +123,69 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    const opener = event.target.closest('[data-modal-open]');
+    const detailTrigger = target.closest('[data-event-detail]');
+
+    if (detailTrigger instanceof HTMLElement) {
+        openEventDetail(detailTrigger);
+        return;
+    }
+
+    const opener = target.closest('[data-modal-open]');
 
     if (opener instanceof HTMLElement) {
         const modalId = opener.getAttribute('data-modal-open');
         const modal = modalId ? document.getElementById(modalId) : null;
 
-        if (modal) {
+        if (modal instanceof HTMLElement) {
             openModal(modal);
         }
 
         return;
     }
 
-    const closeButton = event.target.closest('[data-modal-close]');
+    const closeButton = target.closest('[data-modal-close]');
 
     if (closeButton instanceof HTMLElement) {
         const modal = closeButton.closest('[data-modal]');
 
-        if (modal) {
+        if (modal instanceof HTMLElement) {
             closeModal(modal);
         }
 
         return;
     }
 
-    if (event.target instanceof HTMLElement && event.target.matches('[data-modal]')) {
-        closeModal(event.target);
+    if (target instanceof HTMLElement && target.matches('[data-modal]')) {
+        closeModal(target);
     }
 });
 
 document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') {
+    if (event.key === 'Escape') {
+        const open = document.querySelector('[data-modal]:not([hidden])');
+
+        if (open instanceof HTMLElement) {
+            closeModal(open);
+        }
+
         return;
     }
 
-    const open = document.querySelector('[data-modal]:not([hidden])');
+    if (event.key !== 'Enter' && event.key !== ' ') {
+        return;
+    }
 
-    if (open) {
-        closeModal(open);
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+        return;
+    }
+
+    const detailTrigger = target.closest('[data-event-detail]');
+
+    if (detailTrigger instanceof HTMLElement) {
+        event.preventDefault();
+        openEventDetail(detailTrigger);
     }
 });
 

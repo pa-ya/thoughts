@@ -625,3 +625,115 @@ body.modal-open {
         width: 100%;
     }
 }
+
+.button:disabled,
+.button:disabled:hover {
+    cursor: not-allowed;
+    opacity: 0.58;
+    transform: none;
+}
+
+.button-danger {
+    background: var(--danger);
+}
+
+.button-danger:hover {
+    background: #991b1b;
+}
+
+.event-detail-trigger {
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.event-detail-trigger:hover {
+    border-color: rgba(37, 99, 235, 0.46);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+}
+
+.event-detail-trigger:focus-visible {
+    border-color: var(--accent);
+    outline: 3px solid rgba(37, 99, 235, 0.22);
+    outline-offset: 3px;
+}
+
+.modal-panel-wide {
+    width: min(100%, 820px);
+}
+
+.detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 22px 0 0;
+    padding: 0;
+}
+
+.detail-stats div,
+.detail-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+}
+
+.detail-stats div {
+    padding: 12px;
+}
+
+.detail-stats dt {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.detail-stats dd {
+    margin: 4px 0 0;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.detail-section {
+    padding: 14px;
+}
+
+.detail-section h3 {
+    font-size: 0.96rem;
+}
+
+.detail-text {
+    margin: 10px 0 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.detail-comments,
+.comment-form {
+    margin-top: 12px;
+}
+
+.form-field textarea:disabled {
+    background: #eef2f7;
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .detail-stats,
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.button-danger:disabled:hover {
+    background: var(--danger);
+}

@@ -147,6 +147,21 @@ function normalize_timeline_event(array $event): array
     ];
 }
 
+function event_detail_payload(array $event): array
+{
+    return [
+        'id' => (int) $event['id'],
+        'eventDate' => (string) $event['event_date'],
+        'eventDateLabel' => (string) ($event['event_date_label'] ?? $event['event_date']),
+        'eventText' => (string) $event['event_text'],
+        'thoughts' => (string) $event['thoughts'],
+        'physicalEffect' => (string) $event['physical_effect'],
+        'feelingRate' => format_feeling_rate((float) $event['feeling_rate']),
+        'commentCount' => (int) $event['comment_count'],
+        'unreadCommentCount' => (int) $event['unread_comment_count'],
+    ];
+}
+
 function group_events_by_month_day(array $events): array
 {
     $months = [];

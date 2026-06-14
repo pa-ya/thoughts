@@ -2,7 +2,7 @@
 
 This project will be built as a pure PHP, HTML, CSS, and JavaScript application backed by MySQL. The plan below separates the work into phases so each phase produces a working, testable section of the app.
 
-Current status: Phase 5 is complete. Phase 6 is next.
+Current status: Phase 6 is complete. Phase 7 is next.
 
 ## Phase 1: Project Foundation
 
@@ -150,6 +150,8 @@ Acceptance criteria:
 - New events appear under the proper month and day.
 
 ## Phase 6: Event Detail Modal
+
+Status: Complete.
 
 Goal: Let users click an event and see its full details.
 

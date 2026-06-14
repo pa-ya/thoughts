@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../thoughts-api/src/auth.php';
 require_once __DIR__ . '/../thoughts-api/src/events.php';
+require_once __DIR__ . '/../thoughts-api/src/comments.php';
 
 start_app_session();
 
@@ -78,6 +79,14 @@ function field_error(array $errors, string $field): ?string
     $error = $errors[$field] ?? null;
 
     return is_string($error) ? $error : null;
+}
+
+function event_detail_json(array $event): string
+{
+    return json_encode(
+        event_detail_payload($event),
+        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+    );
 }
 ?>
 <!doctype html>
@@ -185,9 +194,16 @@ function field_error(array $errors, string $field): ?string
                                     <div class="accordion-panel day-panel" id="<?= e($dayPanelId) ?>" hidden>
                                         <div class="event-list">
                                             <?php foreach ($day['events'] as $event): ?>
-                                                <article class="event-item">
+                                                <?php $eventPreview = event_preview((string) $event['event_text']); ?>
+                                                <article
+                                                    class="event-item event-detail-trigger"
+                                                    role="button"
+                                                    tabindex="0"
+                                                    aria-label="Open event details: <?= e($eventPreview) ?>"
+                                                    data-event-detail="<?= e(event_detail_json($event)) ?>"
+                                                >
                                                     <div class="event-main">
-                                                        <h3><?= e(event_preview((string) $event['event_text'])) ?></h3>
+                                                        <h3><?= e($eventPreview) ?></h3>
                                                         <dl class="event-facts">
                                                             <div>
                                                                 <dt>Feeling</dt>
@@ -316,5 +332,76 @@ function field_error(array $errors, string $field): ?string
             </section>
         </div>
     <?php endif; ?>
+
+    <div
+        class="modal-backdrop"
+        id="event-detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="event-detail-title"
+        aria-hidden="true"
+        data-modal
+        data-event-detail-modal
+        hidden
+    >
+        <section class="modal-panel modal-panel-wide" data-modal-panel>
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow">Event Detail</p>
+                    <h2 id="event-detail-title" data-detail-field="eventText">Event</h2>
+                </div>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close modal">x</button>
+            </div>
+
+            <dl class="detail-stats" aria-label="Event summary">
+                <div>
+                    <dt>Date</dt>
+                    <dd data-detail-field="eventDateLabel"></dd>
+                </div>
+                <div>
+                    <dt>Feeling</dt>
+                    <dd><span data-detail-field="feelingRate"></span>/10</dd>
+                </div>
+                <div>
+                    <dt>Comments</dt>
+                    <dd data-detail-field="commentSummary"></dd>
+                </div>
+            </dl>
+
+            <div class="detail-grid">
+                <section class="detail-section">
+                    <h3>Thoughts</h3>
+                    <p class="detail-text" data-detail-field="thoughts"></p>
+                </section>
+                <section class="detail-section">
+                    <h3>Physical Effect</h3>
+                    <p class="detail-text" data-detail-field="physicalEffect"></p>
+                </section>
+            </div>
+
+            <?php if ($currentRole === ROLE_ADMIN): ?>
+                <section class="detail-section detail-comments">
+                    <h3>Comments</h3>
+                    <p class="detail-text" data-detail-field="adminCommentsPreview"></p>
+                </section>
+
+                <div class="modal-actions detail-actions">
+                    <button class="button button-secondary" type="button" disabled>Edit</button>
+                    <button class="button button-danger" type="button" disabled>Delete</button>
+                </div>
+            <?php else: ?>
+                <form class="event-form comment-form" method="post" action="#">
+                    <input type="hidden" name="event_id" value="">
+                    <div class="form-field">
+                        <label for="detail-comment">Comment</label>
+                        <textarea id="detail-comment" name="comment_text" maxlength="<?= COMMENT_TEXT_MAX_LENGTH ?>" rows="4" disabled></textarea>
+                    </div>
+                    <div class="modal-actions detail-actions">
+                        <button class="button" type="submit" disabled>Send Comment</button>
+                    </div>
+                </form>
+            <?php endif; ?>
+        </section>
+    </div>
 </body>
 </html>

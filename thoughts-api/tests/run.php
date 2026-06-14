@@ -221,6 +221,30 @@ test('timeline grouping nests events by month and day', function (): void {
     assert_same('June 12, 2026', $groups[1]['days'][0]['events'][0]['event_date_label'], 'Event should receive display date label.');
 });
 
+test('event detail payload exposes modal-ready values', function (): void {
+    $payload = event_detail_payload([
+        'id' => 5,
+        'event_date' => '2026-06-12',
+        'event_date_label' => 'June 12, 2026',
+        'event_text' => 'Full event text',
+        'thoughts' => "Line one\nLine two",
+        'physical_effect' => 'Steady breathing',
+        'feeling_rate' => 7.5,
+        'comment_count' => 2,
+        'unread_comment_count' => 1,
+    ]);
+
+    assert_same(5, $payload['id'], 'Payload should include event id.');
+    assert_same('2026-06-12', $payload['eventDate'], 'Payload should include machine-readable date.');
+    assert_same('June 12, 2026', $payload['eventDateLabel'], 'Payload should include display date.');
+    assert_same('Full event text', $payload['eventText'], 'Payload should include full event text.');
+    assert_same("Line one\nLine two", $payload['thoughts'], 'Payload should preserve long text formatting.');
+    assert_same('Steady breathing', $payload['physicalEffect'], 'Payload should include physical effect.');
+    assert_same('7.5', $payload['feelingRate'], 'Payload should include formatted feeling rate.');
+    assert_same(2, $payload['commentCount'], 'Payload should include total comments.');
+    assert_same(1, $payload['unreadCommentCount'], 'Payload should include unread comments.');
+});
+
 test('feeling rates are formatted without unnecessary trailing zeros', function (): void {
     assert_same('0', format_feeling_rate(0.0), 'Zero should format cleanly.');
     assert_same('3.25', format_feeling_rate(3.25), 'Fractional rates should be preserved.');
