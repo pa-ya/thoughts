@@ -224,13 +224,22 @@ function event_detail_json(array $event): string
                                     <div class="accordion-panel day-panel" id="<?= e($dayPanelId) ?>" hidden>
                                         <div class="event-list">
                                             <?php foreach ($day['events'] as $event): ?>
-                                                <?php $eventPreview = event_preview((string) $event['event_text']); ?>
+                                                <?php
+                                                $eventPreview = event_preview((string) $event['event_text']);
+                                                $detailEvent = $event;
+
+                                                // Unread state is admin-only; viewers must not see how many
+                                                // comments the admin has not read yet.
+                                                if ($currentRole !== ROLE_ADMIN) {
+                                                    $detailEvent['unread_comment_count'] = 0;
+                                                }
+                                                ?>
                                                 <article
                                                     class="event-item event-detail-trigger"
                                                     role="button"
                                                     tabindex="0"
                                                     aria-label="Open event details: <?= e($eventPreview) ?>"
-                                                    data-event-detail="<?= e(event_detail_json($event)) ?>"
+                                                    data-event-detail="<?= e(event_detail_json($detailEvent)) ?>"
                                                 >
                                                     <div class="event-main">
                                                         <h3 dir="auto"><?= e($eventPreview) ?></h3>

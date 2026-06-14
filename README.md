@@ -7,7 +7,7 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phases 1 through 12 are implemented. The development plan is tracked in `TASKS.md`.
+Phases 1 through 13 are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
 
@@ -27,10 +27,11 @@ Implemented:
 - Polished dashboard, modal, form, and accordion styling with restrained animations.
 - Admin-controlled theme, accent color, font size, font family, and density settings.
 - CSRF-protected mutation routes, safer session cookies, and session-based login throttling.
+- Manual QA checklist and live-smoke-tested admin/viewer workflows.
 
 Planned:
 
-- Manual QA and deployment documentation.
+- Deployment documentation.
 
 ## Event Fields
 
@@ -201,7 +202,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 12 is complete. Phase 13, testing and manual QA, is next.
+Current status: Phase 13 is complete. Phase 14, deployment documentation, is next.
 
 ## Tests
 
@@ -226,7 +227,8 @@ Recommended order:
 9. Polish responsive UI and animations.
 10. Add customization settings.
 11. Harden security.
-12. Run manual QA and document deployment.
+12. Run manual QA.
+13. Document deployment.
 
 ## Future Local Setup
 

@@ -2,7 +2,7 @@
 
 This project will be built as a pure PHP, HTML, CSS, and JavaScript application backed by MySQL. The plan below separates the work into phases so each phase produces a working, testable section of the app.
 
-Current status: Phase 12 is complete. Phase 13 is next.
+Current status: Phase 13 is complete. Phase 14 is next.
 
 ## Phase 1: Project Foundation
 
@@ -326,6 +326,8 @@ Acceptance criteria:
 - Passwords are never exposed in committed files.
 
 ## Phase 13: Testing And Manual QA
+
+Status: Complete.
 
 Goal: Verify the complete app works across roles and devices.
 
