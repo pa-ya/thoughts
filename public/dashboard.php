@@ -203,7 +203,7 @@ function event_detail_json(array $event): string
                                                     data-event-detail="<?= e(event_detail_json($event)) ?>"
                                                 >
                                                     <div class="event-main">
-                                                        <h3><?= e($eventPreview) ?></h3>
+                                                        <h3 dir="auto"><?= e($eventPreview) ?></h3>
                                                         <dl class="event-facts">
                                                             <div>
                                                                 <dt>Feeling</dt>
@@ -285,7 +285,7 @@ function event_detail_json(array $event): string
 
                     <div class="form-field">
                         <label for="event_text">Event</label>
-                        <textarea id="event_text" name="event_text" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" required><?= e(old_event_value($eventFormOld, 'event_text')) ?></textarea>
+                        <textarea id="event_text" name="event_text" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" dir="auto" required><?= e(old_event_value($eventFormOld, 'event_text')) ?></textarea>
                         <?php if (($error = field_error($eventFormErrors, 'event_text')) !== null): ?>
                             <p class="input-error"><?= e($error) ?></p>
                         <?php endif; ?>
@@ -293,7 +293,7 @@ function event_detail_json(array $event): string
 
                     <div class="form-field">
                         <label for="thoughts">Thoughts</label>
-                        <textarea id="thoughts" name="thoughts" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" required><?= e(old_event_value($eventFormOld, 'thoughts')) ?></textarea>
+                        <textarea id="thoughts" name="thoughts" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" dir="auto" required><?= e(old_event_value($eventFormOld, 'thoughts')) ?></textarea>
                         <?php if (($error = field_error($eventFormErrors, 'thoughts')) !== null): ?>
                             <p class="input-error"><?= e($error) ?></p>
                         <?php endif; ?>
@@ -301,7 +301,7 @@ function event_detail_json(array $event): string
 
                     <div class="form-field">
                         <label for="physical_effect">Physical Effect</label>
-                        <textarea id="physical_effect" name="physical_effect" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" required><?= e(old_event_value($eventFormOld, 'physical_effect')) ?></textarea>
+                        <textarea id="physical_effect" name="physical_effect" maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>" rows="4" dir="auto" required><?= e(old_event_value($eventFormOld, 'physical_effect')) ?></textarea>
                         <?php if (($error = field_error($eventFormErrors, 'physical_effect')) !== null): ?>
                             <p class="input-error"><?= e($error) ?></p>
                         <?php endif; ?>
@@ -352,7 +352,7 @@ function event_detail_json(array $event): string
             <div class="modal-header">
                 <div>
                     <p class="eyebrow">Event Detail</p>
-                    <h2 id="event-detail-title" data-detail-field="eventText">Event</h2>
+                    <h2 id="event-detail-title" data-detail-field="eventText" dir="auto">Event</h2>
                 </div>
                 <button class="modal-close" type="button" data-modal-close aria-label="Close modal">x</button>
             </div>
@@ -375,11 +375,11 @@ function event_detail_json(array $event): string
             <div class="detail-grid" data-detail-view>
                 <section class="detail-section">
                     <h3>Thoughts</h3>
-                    <p class="detail-text" data-detail-field="thoughts"></p>
+                    <p class="detail-text" data-detail-field="thoughts" dir="auto"></p>
                 </section>
                 <section class="detail-section">
                     <h3>Physical Effect</h3>
-                    <p class="detail-text" data-detail-field="physicalEffect"></p>
+                    <p class="detail-text" data-detail-field="physicalEffect" dir="auto"></p>
                 </section>
             </div>
 
@@ -423,6 +423,7 @@ function event_detail_json(array $event): string
                             maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>"
                             rows="4"
                             data-edit-field="eventText"
+                            dir="auto"
                             required
                         ></textarea>
                     </div>
@@ -435,6 +436,7 @@ function event_detail_json(array $event): string
                             maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>"
                             rows="4"
                             data-edit-field="thoughts"
+                            dir="auto"
                             required
                         ></textarea>
                     </div>
@@ -447,6 +449,7 @@ function event_detail_json(array $event): string
                             maxlength="<?= EVENT_TEXT_MAX_LENGTH ?>"
                             rows="4"
                             data-edit-field="physicalEffect"
+                            dir="auto"
                             required
                         ></textarea>
                     </div>
@@ -476,7 +479,7 @@ function event_detail_json(array $event): string
                     <input type="hidden" name="event_id" value="" data-event-id-input>
                     <div class="form-field">
                         <label for="detail-comment">Comment</label>
-                        <textarea id="detail-comment" name="comment_text" maxlength="<?= COMMENT_TEXT_MAX_LENGTH ?>" rows="4" required></textarea>
+                        <textarea id="detail-comment" name="comment_text" maxlength="<?= COMMENT_TEXT_MAX_LENGTH ?>" rows="4" dir="auto" required></textarea>
                     </div>
                     <div class="modal-actions detail-actions">
                         <button class="button" type="submit">Send Comment</button>

@@ -1,6 +1,16 @@
 document.documentElement.classList.add('js-enabled');
 
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const hideModal = (modal) => {
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+    modal.classList.remove('is-closing');
+    document.body.classList.remove('modal-open');
+};
+
 const openModal = (modal) => {
+    modal.classList.remove('is-closing');
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
@@ -13,9 +23,106 @@ const openModal = (modal) => {
 };
 
 const closeModal = (modal) => {
-    modal.hidden = true;
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('modal-open');
+    if (modal.hidden || modal.classList.contains('is-closing')) {
+        return;
+    }
+
+    if (prefersReducedMotion()) {
+        hideModal(modal);
+        return;
+    }
+
+    modal.classList.add('is-closing');
+
+    const backdropAnimation = modal.animate(
+        [
+            { opacity: 1 },
+            { opacity: 0 },
+        ],
+        {
+            duration: 140,
+            easing: 'ease-out',
+        }
+    );
+
+    const panel = modal.querySelector('[data-modal-panel]');
+
+    if (panel instanceof HTMLElement) {
+        panel.animate(
+            [
+                { opacity: 1, transform: 'translateY(0) scale(1)' },
+                { opacity: 0, transform: 'translateY(8px) scale(0.985)' },
+            ],
+            {
+                duration: 140,
+                easing: 'ease-out',
+            }
+        );
+    }
+
+    backdropAnimation.onfinish = () => hideModal(modal);
+    backdropAnimation.oncancel = () => hideModal(modal);
+};
+
+const toggleAccordionPanel = (toggle, panel) => {
+    const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+    const item = toggle.closest('.accordion-item');
+
+    panel.getAnimations().forEach((animation) => animation.cancel());
+    toggle.setAttribute('aria-expanded', String(!isExpanded));
+    item?.classList.toggle('is-open', !isExpanded);
+
+    if (prefersReducedMotion()) {
+        panel.hidden = isExpanded;
+        return;
+    }
+
+    panel.dataset.animating = 'true';
+
+    if (!isExpanded) {
+        panel.hidden = false;
+        const targetHeight = panel.scrollHeight;
+
+        const animation = panel.animate(
+            [
+                { height: '0px', opacity: 0, transform: 'translateY(-4px)' },
+                { height: `${targetHeight}px`, opacity: 1, transform: 'translateY(0)' },
+            ],
+            {
+                duration: 220,
+                easing: 'cubic-bezier(0.2, 0, 0, 1)',
+            }
+        );
+
+        animation.onfinish = () => {
+            panel.style.height = '';
+            panel.style.opacity = '';
+            panel.style.transform = '';
+            delete panel.dataset.animating;
+        };
+
+        return;
+    }
+
+    const startHeight = panel.scrollHeight;
+    const animation = panel.animate(
+        [
+            { height: `${startHeight}px`, opacity: 1, transform: 'translateY(0)' },
+            { height: '0px', opacity: 0, transform: 'translateY(-4px)' },
+        ],
+        {
+            duration: 180,
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        }
+    );
+
+    animation.onfinish = () => {
+        panel.hidden = true;
+        panel.style.height = '';
+        panel.style.opacity = '';
+        panel.style.transform = '';
+        delete panel.dataset.animating;
+    };
 };
 
 const pluralizeCount = (count, singular, plural) => `${count} ${count === 1 ? singular : plural}`;
@@ -137,6 +244,7 @@ const renderAdminComments = (modal, comments) => {
 
         const text = document.createElement('p');
         text.className = 'comment-text';
+        text.dir = 'auto';
         text.textContent = detailValue(comment?.text);
 
         item.append(meta, text);
@@ -330,10 +438,7 @@ document.addEventListener('click', (event) => {
             return;
         }
 
-        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!isExpanded));
-        panel.hidden = isExpanded;
-        toggle.closest('.accordion-item')?.classList.toggle('is-open', !isExpanded);
+        toggleAccordionPanel(toggle, panel);
         return;
     }
 

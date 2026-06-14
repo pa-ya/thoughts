@@ -7,7 +7,7 @@ The project has two access levels:
 - Admin: can add, edit, delete, and view events. Admin can also read viewer comments.
 - Viewer: can view events and add comments to a specific event. Viewer cannot change event data.
 
-Phases 1 through 9 are implemented. The development plan is tracked in `TASKS.md`.
+Phases 1 through 10 are implemented. The development plan is tracked in `TASKS.md`.
 
 ## Core Features
 
@@ -23,7 +23,8 @@ Implemented:
 - Admin unread comment indicators.
 - Admin comment review with read tracking.
 - Admin event editing and deleting.
-- Responsive baseline interface for mobile, tablet, and desktop.
+- Responsive interface for mobile, tablet, and desktop.
+- Polished dashboard, modal, form, and accordion styling with restrained animations.
 
 Planned:
 
@@ -195,7 +196,7 @@ Planned interface elements:
 
 See `TASKS.md` for the phase-by-phase implementation plan.
 
-Current status: Phase 9 is complete. Phase 10, responsive UI and visual design, is next.
+Current status: Phase 10 is complete. Phase 11, customization settings, is next.
 
 ## Tests
 
