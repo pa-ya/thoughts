@@ -84,6 +84,19 @@ function old_event_value(array $old, string $field, string $default = ''): strin
     return (string) ($old[$field] ?? $default);
 }
 
+function feeling_tier(float $rate): string
+{
+    if ($rate < 4.0) {
+        return 'low';
+    }
+
+    if ($rate < 7.0) {
+        return 'mid';
+    }
+
+    return 'high';
+}
+
 function field_error(array $errors, string $field): ?string
 {
     $error = $errors[$field] ?? null;
@@ -226,6 +239,9 @@ function event_detail_json(array $event): string
                                             <?php foreach ($day['events'] as $event): ?>
                                                 <?php
                                                 $eventPreview = event_preview((string) $event['event_text']);
+                                                $feelingValue = (float) $event['feeling_rate'];
+                                                $thoughtsText = trim((string) $event['thoughts']);
+                                                $physicalText = trim((string) $event['physical_effect']);
                                                 $detailEvent = $event;
 
                                                 // Unread state is admin-only; viewers must not see how many
@@ -241,33 +257,52 @@ function event_detail_json(array $event): string
                                                     aria-label="Open event details: <?= e($eventPreview) ?>"
                                                     data-event-detail="<?= e(event_detail_json($detailEvent)) ?>"
                                                 >
-                                                    <div class="event-main">
-                                                        <h3 dir="auto"><?= e($eventPreview) ?></h3>
-                                                        <dl class="event-facts">
-                                                            <div>
-                                                                <dt>Feeling</dt>
-                                                                <dd><?= e(format_feeling_rate((float) $event['feeling_rate'])) ?>/10</dd>
-                                                            </div>
-                                                            <div>
-                                                                <dt>Date</dt>
-                                                                <dd><?= e((string) $event['event_date_label']) ?></dd>
-                                                            </div>
-                                                        </dl>
-                                                    </div>
+                                                    <header class="event-head">
+                                                        <span class="feeling-chip" data-tier="<?= e(feeling_tier($feelingValue)) ?>" title="Feeling rate">
+                                                            <span class="feeling-chip-num"><?= e(format_feeling_rate($feelingValue)) ?></span>
+                                                            <span class="feeling-chip-unit">/10</span>
+                                                        </span>
+                                                        <span class="event-date"><?= e((string) $event['event_date_label']) ?></span>
+                                                        <span class="event-badges" aria-label="Event status">
+                                                            <?php if ((int) $event['comment_count'] > 0): ?>
+                                                                <span class="comment-badge" data-comment-count-badge>
+                                                                    <?= e(pluralize_count((int) $event['comment_count'], 'comment', 'comments')) ?>
+                                                                </span>
+                                                            <?php endif; ?>
 
-                                                    <div class="event-badges" aria-label="Event status">
-                                                        <?php if ((int) $event['comment_count'] > 0): ?>
-                                                            <span class="comment-badge" data-comment-count-badge>
-                                                                <?= e(pluralize_count((int) $event['comment_count'], 'comment', 'comments')) ?>
-                                                            </span>
+                                                            <?php if ($currentRole === ROLE_ADMIN && (int) $event['unread_comment_count'] > 0): ?>
+                                                                <span class="comment-badge comment-badge-new" data-unread-comment-badge>
+                                                                    <?= e(pluralize_count((int) $event['unread_comment_count'], 'new', 'new')) ?>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                    </header>
+
+                                                    <div class="event-body">
+                                                        <section class="event-field event-field-primary">
+                                                            <h3 class="event-field-label">Event</h3>
+                                                            <p class="event-field-text" dir="auto"><?= e((string) $event['event_text']) ?></p>
+                                                        </section>
+
+                                                        <?php if ($thoughtsText !== ''): ?>
+                                                            <section class="event-field">
+                                                                <h4 class="event-field-label">Thoughts</h4>
+                                                                <p class="event-field-text" dir="auto"><?= e($thoughtsText) ?></p>
+                                                            </section>
                                                         <?php endif; ?>
 
-                                                        <?php if ($currentRole === ROLE_ADMIN && (int) $event['unread_comment_count'] > 0): ?>
-                                                            <span class="comment-badge comment-badge-new" data-unread-comment-badge>
-                                                                <?= e(pluralize_count((int) $event['unread_comment_count'], 'new', 'new')) ?>
-                                                            </span>
+                                                        <?php if ($physicalText !== ''): ?>
+                                                            <section class="event-field">
+                                                                <h4 class="event-field-label">Physical Effect</h4>
+                                                                <p class="event-field-text" dir="auto"><?= e($physicalText) ?></p>
+                                                            </section>
                                                         <?php endif; ?>
                                                     </div>
+
+                                                    <footer class="event-foot">
+                                                        <span class="event-open-hint"><?= $currentRole === ROLE_ADMIN ? 'Open to review comments or edit' : 'Open to read and comment' ?></span>
+                                                        <span class="event-open-icon" aria-hidden="true">&rarr;</span>
+                                                    </footer>
                                                 </article>
                                             <?php endforeach; ?>
                                         </div>
@@ -519,32 +554,39 @@ function event_detail_json(array $event): string
             <div class="modal-header">
                 <div>
                     <p class="eyebrow">Event Detail</p>
-                    <h2 id="event-detail-title" data-detail-field="eventText" dir="auto">Event</h2>
+                    <h2 id="event-detail-title">Event Detail</h2>
                 </div>
                 <button class="modal-close" type="button" data-modal-close aria-label="Close modal">x</button>
             </div>
 
-            <dl class="detail-stats" aria-label="Event summary" data-detail-view>
-                <div>
-                    <dt>Date</dt>
-                    <dd data-detail-field="eventDateLabel"></dd>
+            <div class="detail-summary" aria-label="Event summary" data-detail-view>
+                <div class="detail-summary-item">
+                    <span class="detail-summary-label">Date</span>
+                    <span class="detail-summary-value" data-detail-field="eventDateLabel"></span>
                 </div>
-                <div>
-                    <dt>Feeling</dt>
-                    <dd><span data-detail-field="feelingRate"></span>/10</dd>
+                <div class="detail-summary-item">
+                    <span class="detail-summary-label">Feeling</span>
+                    <span class="feeling-chip" data-detail-feeling data-tier="mid">
+                        <span class="feeling-chip-num" data-detail-field="feelingRate"></span>
+                        <span class="feeling-chip-unit">/10</span>
+                    </span>
                 </div>
-                <div>
-                    <dt>Comments</dt>
-                    <dd data-detail-field="commentSummary"></dd>
+                <div class="detail-summary-item">
+                    <span class="detail-summary-label">Comments</span>
+                    <span class="detail-summary-value" data-detail-field="commentSummary"></span>
                 </div>
-            </dl>
+            </div>
 
-            <div class="detail-grid" data-detail-view>
-                <section class="detail-section">
+            <div class="detail-sections" data-detail-view>
+                <section class="detail-section" data-detail-section="eventText">
+                    <h3>Event</h3>
+                    <p class="detail-text" data-detail-field="eventText" dir="auto"></p>
+                </section>
+                <section class="detail-section" data-detail-section="thoughts">
                     <h3>Thoughts</h3>
                     <p class="detail-text" data-detail-field="thoughts" dir="auto"></p>
                 </section>
-                <section class="detail-section">
+                <section class="detail-section" data-detail-section="physicalEffect">
                     <h3>Physical Effect</h3>
                     <p class="detail-text" data-detail-field="physicalEffect" dir="auto"></p>
                 </section>

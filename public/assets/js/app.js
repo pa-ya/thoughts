@@ -153,6 +153,24 @@ const detailValue = (value) => {
     return '';
 };
 
+const feelingTier = (value) => {
+    const rate = Number.parseFloat(value);
+
+    if (!Number.isFinite(rate)) {
+        return 'mid';
+    }
+
+    if (rate < 4) {
+        return 'low';
+    }
+
+    if (rate < 7) {
+        return 'mid';
+    }
+
+    return 'high';
+};
+
 const setEditMode = (modal, isEditing) => {
     modal.querySelectorAll('[data-detail-view]').forEach((section) => {
         if (section instanceof HTMLElement) {
@@ -382,6 +400,23 @@ const fillEventDetailModal = (modal, detail) => {
         if (eventId instanceof HTMLInputElement) {
             eventId.value = detailValue(detail.id);
         }
+    });
+
+    const feelingChip = modal.querySelector('[data-detail-feeling]');
+
+    if (feelingChip instanceof HTMLElement) {
+        feelingChip.setAttribute('data-tier', feelingTier(detail.feelingRate));
+    }
+
+    // Hide optional sections (thoughts, physical effect) when they have no content.
+    modal.querySelectorAll('[data-detail-section]').forEach((section) => {
+        if (!(section instanceof HTMLElement)) {
+            return;
+        }
+
+        const key = section.getAttribute('data-detail-section');
+        const text = key ? detailValue(detail[key]) : '';
+        section.hidden = text.trim() === '';
     });
 
     fillEditForm(modal, detail);
