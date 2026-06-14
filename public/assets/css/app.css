@@ -1790,3 +1790,249 @@ body[data-theme="dark"] .day-panel {
         gap: 10px 18px;
     }
 }
+
+/* =====================================================================
+   Phase 15 visual refinement
+   Pure CSS, no framework: a utility framework (Bootstrap/Tailwind) would
+   fight the existing custom-property design system, dark mode, density
+   modes and live accent theming. Instead this layer (a) makes the whole
+   UI respond to the chosen accent color, (b) adds depth, and (c) adds
+   restrained, reduced-motion-safe entrance and hover motion.
+   ===================================================================== */
+:root {
+    /* Accent-derived helpers so focus rings, hovers and shadows all
+       follow the admin's chosen accent color instead of a fixed blue. */
+    --ring: color-mix(in srgb, var(--accent) 34%, transparent);
+    --ring-soft: color-mix(in srgb, var(--accent) 18%, transparent);
+    --hover-tint: color-mix(in srgb, var(--accent) 9%, var(--surface));
+    --accent-glow: color-mix(in srgb, var(--accent) 30%, transparent);
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+::selection {
+    background: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+/* Accent-aware, slim scrollbars */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--accent) 40%, var(--border)) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+}
+
+*::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 36%, var(--border));
+    background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--accent) 56%, var(--border));
+    background-clip: content-box;
+}
+
+/* Focus states everywhere now track the accent color */
+.button:focus-visible,
+.accordion-toggle:focus-visible,
+.event-detail-trigger:focus-visible,
+.login-form input:focus,
+.segmented-options input:focus-visible + span {
+    outline-color: var(--ring);
+}
+
+.login-form input:focus,
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus,
+.modal-close:focus-visible {
+    box-shadow: 0 0 0 4px var(--ring-soft);
+}
+
+/* Eyebrow labels pick up a hint of the accent for cohesion */
+.eyebrow {
+    color: color-mix(in srgb, var(--accent) 60%, var(--muted));
+    letter-spacing: 0.13em;
+}
+
+/* Headings get a subtle accent-leaning gradient ink */
+h1 {
+    background: linear-gradient(118deg, var(--text) 0%, color-mix(in srgb, var(--accent) 52%, var(--text)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Primary buttons: accent gradient face and accent-colored lift shadow */
+.button:not(.button-secondary):not(.button-danger) {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, #fff) 0%, var(--accent) 52%, var(--accent-strong) 100%);
+    box-shadow: 0 1px 1px rgba(15, 23, 42, 0.08), 0 10px 22px var(--accent-glow);
+}
+
+.button:not(.button-secondary):not(.button-danger):hover {
+    background-image: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+    box-shadow: 0 1px 1px rgba(15, 23, 42, 0.1), 0 14px 30px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.button:active {
+    transform: translateY(0) scale(0.99);
+}
+
+/* Login: a soft accent glow blooms behind the card */
+.auth-shell {
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-shell::before {
+    content: "";
+    position: absolute;
+    top: -180px;
+    left: 50%;
+    width: 560px;
+    height: 560px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 68%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.auth-shell .panel {
+    position: relative;
+    z-index: 1;
+}
+
+/* Dashboard status cards: gentle hover lift */
+.dashboard-meta > div {
+    transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+
+.dashboard-meta > div:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 26%, var(--border));
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.07);
+}
+
+/* Accordion: accent-tinted hover, circular icon chip, pill-shaped counts */
+.accordion-toggle:hover {
+    background: var(--hover-tint);
+}
+
+.accordion-item.is-open {
+    border-color: var(--ring);
+}
+
+.accordion-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    font-size: 0.82rem;
+    transition: transform 180ms var(--ease-out), background 180ms var(--ease-out);
+}
+
+.accordion-toggle[aria-expanded="true"] .accordion-icon {
+    background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+}
+
+.accordion-subtitle {
+    display: inline-block;
+    margin-top: 7px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 9%, var(--surface-muted));
+    color: color-mix(in srgb, var(--accent) 48%, var(--muted));
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* Event cards: accent wash + chip pop on hover */
+.event-detail-trigger {
+    transition: border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 180ms var(--ease-out), background 180ms var(--ease-out);
+}
+
+.event-detail-trigger:hover {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--hover-tint) 100%);
+}
+
+.feeling-chip {
+    transition: transform 160ms var(--ease-out);
+}
+
+.event-detail-trigger:hover .feeling-chip {
+    transform: scale(1.05);
+}
+
+/* Modal close button hover adapts to theme + accent */
+.modal-close:hover {
+    background: var(--hover-tint);
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+/* Modal panels carry a slim accent rule along the top edge */
+.modal-panel {
+    border-top: 3px solid var(--accent);
+}
+
+/* Entrance + interaction motion (skipped under reduced-motion) */
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes panel-bloom {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .auth-shell .panel {
+        animation: panel-bloom 520ms var(--ease-out) both;
+    }
+
+    .dashboard-header {
+        animation: rise-in 460ms var(--ease-out) both;
+    }
+
+    .dashboard-meta {
+        animation: rise-in 480ms 60ms var(--ease-out) both;
+    }
+
+    .empty-state {
+        animation: rise-in 520ms 80ms var(--ease-out) both;
+    }
+
+    .timeline-month {
+        animation: rise-in 500ms var(--ease-out) both;
+    }
+
+    .timeline-month:nth-child(1) { animation-delay: 80ms; }
+    .timeline-month:nth-child(2) { animation-delay: 140ms; }
+    .timeline-month:nth-child(3) { animation-delay: 200ms; }
+    .timeline-month:nth-child(4) { animation-delay: 260ms; }
+    .timeline-month:nth-child(5) { animation-delay: 320ms; }
+    .timeline-month:nth-child(6) { animation-delay: 380ms; }
+    .timeline-month:nth-child(n + 7) { animation-delay: 440ms; }
+}
